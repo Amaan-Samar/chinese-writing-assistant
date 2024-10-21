@@ -1,35 +1,21 @@
-# chinese-writing-assistant
+# Chinese Writing Assistant
 
-This template should help get you started developing with Vue 3 in Vite.
+An interactive web application to help learners practice Chinese character writing with proper stroke order and beginner-friendly fonts.
 
-## Recommended IDE Setup
+## Features
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Convert Chinese text to learner-friendly fonts
+- Practice stroke orders
+- [Other features...]
 
-## Customize configuration
+## Getting Started
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+[Installation instructions...]
 
-## Project Setup
+## Contributing
 
-```sh
-npm install
-```
+[How others can contribute...]
 
-### Compile and Hot-Reload for Development
+## License
 
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+[Your chosen license]
