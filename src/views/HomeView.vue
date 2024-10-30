@@ -1,6 +1,5 @@
 <template>
   <div class="home">
-    <!-- Hero Section -->
     <section class="hero">
       <div class="hero-content">
         <h1 class="hero-title">Master Chinese Writing</h1>

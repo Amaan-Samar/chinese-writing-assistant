@@ -7,7 +7,7 @@
         <RouterLink to="/about" class="nav-link">About</RouterLink>
         <RouterLink to="/converter" class="nav-link">Converter</RouterLink>
         <a
-          href="https://github.com/yourusername/chinese-writing-assistant"
+          href="https://github.com/Amaan-Samar/chinese-writing-assistant"
           target="_blank"
           class="nav-link"
         >
