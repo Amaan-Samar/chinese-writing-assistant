@@ -1,10 +1,11 @@
 <template>
   <header class="header">
     <nav class="nav-container">
-      <router-link to="/" class="logo"> Chinese Writing Assistant </router-link>
+      <RouterLink to="/" class="logo"> Chinese Writing Assistant </RouterLink>
       <div class="nav-links">
-        <router-link to="/" class="nav-link">Home</router-link>
-        <router-link to="/about" class="nav-link">About</router-link>
+        <RouterLink to="/" class="nav-link">Home</RouterLink>
+        <RouterLink to="/about" class="nav-link">About</RouterLink>
+        <RouterLink to="/converter" class="nav-link">Converter</RouterLink>
         <a
           href="https://github.com/yourusername/chinese-writing-assistant"
           target="_blank"
@@ -16,6 +17,10 @@
     </nav>
   </header>
 </template>
+
+<script setup>
+import { RouterLink } from 'vue-router'
+</script>
 
 <style scoped>
 .header {
