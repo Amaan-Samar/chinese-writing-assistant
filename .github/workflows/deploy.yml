@@ -3,7 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # Change this to your default branch name if different
+      - main
+
+permissions:
+  contents: write # Add this permissions block
 
 jobs:
   deploy:
@@ -12,6 +15,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false # Add this line
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -28,6 +33,6 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist # Vite builds to the dist folder by default
+          folder: dist
           branch: gh-pages
           clean: true
