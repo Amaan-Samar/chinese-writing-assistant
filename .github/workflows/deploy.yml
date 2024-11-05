@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  contents: write # Add this permissions block
+  contents: write
 
 jobs:
   deploy:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          persist-credentials: false # Add this line
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
