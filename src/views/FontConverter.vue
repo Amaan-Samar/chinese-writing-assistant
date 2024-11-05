@@ -58,23 +58,43 @@
               class="comparison-block"
             >
               <p class="block-number">Block {{ index + 1 }}</p>
-              <div
-                class="converted-text"
-                :style="{
-                  fontFamily: getFontFamily,
-                  fontSize: `${fontSize}px`,
-                }"
-              >
-                {{ block }}
-              </div>
-              <div
-                class="original-text"
-                :style="{
-                  fontFamily: fonts.regular,
-                  fontSize: `${fontSize}px`,
-                }"
-              >
-                {{ block }}
+              <div class="line-container">
+                <div
+                  v-for="(line, lineIndex) in splitIntoLines(block)"
+                  :key="lineIndex"
+                  class="text-line"
+                >
+                  <div class="character-container">
+                    <div
+                      v-for="(char, charIndex) in line"
+                      :key="charIndex"
+                      class="character-column"
+                      :class="{ punctuation: isPunctuation(char) }"
+                    >
+                      <div
+                        class="character converted-text"
+                        :style="{
+                          fontFamily: getFontFamily,
+                          fontSize: `${fontSize}px`,
+                        }"
+                      >
+                        {{ char }}
+                      </div>
+                      <div class="pinyin-text" v-if="!isPunctuation(char)">
+                        {{ getPinyinForChar(char) }}
+                      </div>
+                      <div
+                        class="character original-text"
+                        :style="{
+                          fontFamily: fonts.regular,
+                          fontSize: `${fontSize}px`,
+                        }"
+                      >
+                        {{ char }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </template>
@@ -89,6 +109,7 @@
 
 <script>
 import { ref, computed } from 'vue'
+import { pinyin } from 'pinyin-pro'
 
 export default {
   name: 'FontConverter',
@@ -109,18 +130,37 @@ export default {
     const textBlocks = computed(() => {
       if (!inputText.value) return []
 
-      // Split text into sentences using multiple delimiters
       const sentences =
         inputText.value.match(/[^。.!?！？]+[。.!?！？]+/g) || []
-
-      // Handle any remaining text that doesn't end with a delimiter
       const remainingText = inputText.value.match(/[^。.!?！？]+$/)
+
       if (remainingText) {
         sentences.push(remainingText[0])
       }
 
       return sentences.filter(sentence => sentence.trim())
     })
+
+    const splitIntoLines = text => {
+      return text
+        .split('，')
+        .map(line => line.trim())
+        .filter(line => line)
+    }
+
+    const isPunctuation = char => {
+      const punctuationRegex = /[《》【】（）！？。，、：；'"『』「」]/
+      return punctuationRegex.test(char)
+    }
+
+    const getPinyinForChar = char => {
+      if (isPunctuation(char)) return ''
+      return pinyin(char, {
+        toneType: 'symbol',
+        type: 'array',
+        nonZh: 'consecutive',
+      })[0]
+    }
 
     return {
       inputText,
@@ -129,6 +169,9 @@ export default {
       getFontFamily,
       textBlocks,
       fonts,
+      splitIntoLines,
+      isPunctuation,
+      getPinyinForChar,
     }
   },
 }
@@ -149,7 +192,7 @@ export default {
   flex-direction: column;
   gap: 2rem;
   padding: 1rem;
-  /* max-width: 1400px; */
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -191,10 +234,6 @@ export default {
   gap: 1rem;
 }
 
-.comparison-section {
-  width: 100%;
-}
-
 .text-input {
   width: 100%;
   min-height: 300px;
@@ -229,24 +268,60 @@ export default {
   background-color: #f9f9f9;
 }
 
+.line-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.text-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.character-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.character-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 2em;
+  padding: 0.25rem;
+}
+
+.character-column.punctuation {
+  min-width: 1em;
+}
+
+.character {
+  text-align: center;
+  line-height: 1.2;
+  min-height: 1.2em;
+}
+
+.pinyin-text {
+  font-size: 0.8em;
+  color: #2563eb;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  min-height: 1.2em;
+  line-height: 1.2;
+}
+
 .block-number {
   font-size: 0.875rem;
   color: #666;
   margin-bottom: 0.5rem;
-}
-
-.converted-text {
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background-color: white;
-  border-radius: 4px;
-}
-
-.original-text {
-  color: #666;
-  padding: 0.5rem;
-  background-color: white;
-  border-radius: 4px;
 }
 
 .font-selector,
@@ -274,19 +349,9 @@ export default {
     width: 100%;
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 768px) {
-  .controls-container {
-    flex-direction: row; /* Keeps controls in a row on mobile */
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-
-  .font-selector,
-  .size-selector {
-    flex: 1;
-    min-width: 200px;
+  .character-column {
+    min-width: 1.5em;
   }
 }
 </style>

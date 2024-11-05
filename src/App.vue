@@ -20,13 +20,17 @@ import Footer from './components/Footer.vue'
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  align-items: center; /* Center children horizontally */
 }
 
 .main-content {
-  flex: 1;
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  flex: 1; /* Uncomment this to make it take available vertical space */
+  display: flex;
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
   width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+  margin: 0 auto;
 }
 </style>

@@ -105,7 +105,7 @@
 
 <style scoped>
 .home {
-  width: 100%;
+  width: 80%;
 }
 
 /* Hero Section */

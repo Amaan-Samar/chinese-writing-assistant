@@ -1,7 +1,7 @@
 <template>
   <header class="header">
     <nav class="nav-container">
-      <RouterLink to="/" class="logo"> Chinese Writing Assistant </RouterLink>
+      <RouterLink to="/" class="logo"> Writing Assistant </RouterLink>
       <div class="nav-links">
         <RouterLink to="/" class="nav-link">Home</RouterLink>
         <RouterLink to="/about" class="nav-link">About</RouterLink>
@@ -24,6 +24,8 @@ import { RouterLink } from 'vue-router'
 
 <style scoped>
 .header {
+  max-width: 1200px;
+  width: 1000px;
   background-color: #2c3e50;
   color: white;
   padding: 1rem;
