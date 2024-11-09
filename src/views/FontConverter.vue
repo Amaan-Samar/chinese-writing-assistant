@@ -26,7 +26,6 @@
     <div class="main-content">
       <div class="input-display-row">
         <div class="text-section">
-          <h2>Input Chinese Text</h2>
           <textarea
             v-model="inputText"
             placeholder="Enter Chinese text here..."
@@ -35,7 +34,6 @@
         </div>
 
         <div class="text-section">
-          <h2>Selected Font Display</h2>
           <div
             class="text-display"
             :style="{
@@ -177,7 +175,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<!-- <style scoped>
 @font-face {
   font-family: 'tegakizatsu';
   src: url('/fonts/tegakizatsu.ttf') format('truetype');
@@ -352,6 +350,197 @@ export default {
 
   .character-column {
     min-width: 1.5em;
+  }
+}
+</style> -->
+<style scoped>
+@font-face {
+  font-family: 'tegakizatsu';
+  src: url('/fonts/tegakizatsu.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'kaiti';
+  src: url('/fonts/kaiti.ttf') format('truetype');
+}
+
+.converter-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.controls-section {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 10;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.controls-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.input-display-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  width: 100%;
+}
+
+.text-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.text-input {
+  width: 100%;
+  min-height: 300px;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.text-display {
+  min-height: 300px;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  white-space: pre-wrap;
+}
+
+.comparison-display {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.comparison-block {
+  margin-bottom: 2rem; /* Space between blocks */
+  padding: 1rem;
+  border: 1px solid #eee;
+}
+
+.line-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Adjusted for better spacing */
+}
+
+.text-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: white;
+  border-radius: 0.25rem; /* Slightly smaller radius */
+}
+
+.character-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem; /* Increased gap for better spacing */
+  align-items: flex-start;
+}
+
+.character-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: auto; /* Allow flexibility */
+  padding: 0.25rem;
+}
+
+.character-column.punctuation {
+  min-width: auto; /* Allow flexibility */
+}
+
+.character {
+  text-align: center;
+  line-height: 1.2;
+  min-height: auto; /* Allow flexibility */
+}
+
+.pinyin-text {
+  font-size: 0.8em;
+  color: #2563eb;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+}
+
+.block-number {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.font-selector,
+.size-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Reduced gap for tighter layout */
+}
+
+.select-input {
+  padding: 0.5rem;
+  border-radius: 0.25rem; /* Smaller radius for inputs */
+  border: 0.5px solid #ddd; /* Slightly thinner border */
+}
+
+.placeholder-text {
+  color: #999;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 1024px) {
+  /* Tablet and smaller desktops */
+
+  .input-display-row {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(250px, 1fr)
+    ); /* More responsive grid setup */
+  }
+
+  .character-column {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mobile devices */
+
+  .controls-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .text-input,
+  .text-display,
+  .comparison-display {
+    min-height: auto;
+  }
+
+  .comparison-block {
+    margin-bottom: 0.5rem;
   }
 }
 </style>

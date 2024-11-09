@@ -47,7 +47,7 @@ import { RouterLink } from 'vue-router'
 const currentYear = computed(() => new Date().getFullYear())
 </script>
 
-<style scoped>
+<!-- <style scoped>
 .footer {
   background-color: #2c3e50;
   color: white;
@@ -149,6 +149,134 @@ const currentYear = computed(() => new Date().getFullYear())
     flex-direction: column;
     gap: 1rem;
     text-align: center;
+  }
+}
+</style> -->
+
+<style scoped>
+.footer {
+  background-color: #2c3e50;
+  color: white;
+  padding-top: 2rem;
+  margin-top: auto;
+}
+
+.footer-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 250px; /* Ensures a minimum width on larger screens */
+}
+
+.footer-title {
+  font-size: 1.5rem; /* Consider adjusting based on screen size */
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.footer-subtitle {
+  font-size: 1.1rem; /* Adjust for smaller screens */
+  margin-bottom: 0.8rem;
+  color: #bbbbbb;
+}
+
+.footer-description {
+  color: #bbbbbb;
+  line-height: 1.6;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer-link {
+  color: #bbbbbb;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: white;
+}
+
+.footer-bottom {
+  margin-top: 2rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid #3d5266;
+}
+
+.footer-bottom .footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Center items vertically */
+}
+
+.copyright {
+  color: #bbbbbb;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem; /* Space between social icons */
+}
+
+.social-link {
+  color: #bbbbbb;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.social-link:hover {
+  color: white; /* On hover, change color */
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 1024px) {
+  /* Tablet and smaller desktops */
+  .footer-title {
+    font-size: 1.4rem; /* Slightly smaller title */
+  }
+
+  .footer-subtitle {
+    font-size: 1rem; /* Adjust subtitle size */
+  }
+}
+
+@media (max-width: 768px) {
+  /* Mobile devices */
+  .footer-container {
+    flex-direction: column; /* Stack sections vertically */
+    gap: 2rem; /* Space between sections */
+  }
+
+  .footer-section {
+    min-width: auto; /* Allow full width on mobile */
+    flex-basis: auto; /* Allow sections to grow/shrink */
+  }
+
+  .footer-title {
+    font-size: 1.3rem; /* Smaller title for mobile */
+  }
+
+  .footer-subtitle {
+    font-size: 0.9rem; /* Smaller subtitle for mobile */
+  }
+
+  .footer-bottom .footer-container {
+    flex-direction: column; /* Stack items in footer bottom */
+    gap: 0.5rem; /* Space between footer bottom items */
+    text-align: center; /* Center align text on mobile */
   }
 }
 </style>
