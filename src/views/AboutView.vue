@@ -15,7 +15,9 @@
 
 <style scoped>
 .about {
-  /* max-width: 800px; */
+  box-shadow: 0 3px 24px rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  color: #282f3a;
   margin: 0 auto;
   padding: 2rem;
 }

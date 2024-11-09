@@ -1,18 +1,23 @@
 <template>
   <header class="header">
     <nav class="nav-container">
-      <RouterLink to="/" class="logo"> Writing Assistant </RouterLink>
+      <RouterLink to="/" class="logo">
+        <img
+          src="/pen.svg"
+          style="width: 40px; height: 40px; margin-bottom: -8px"
+          alt="Company Logo"
+        />
+        <span style="color: #656ee0"> Little</span>Hanzi
+      </RouterLink>
       <div class="nav-links">
-        <!-- <RouterLink to="/" class="nav-link">Home</RouterLink> -->
-        <!-- <RouterLink to="/converter" class="nav-link">Converter</RouterLink> -->
-        <!-- <RouterLink to="/about" class="nav-link">About</RouterLink> -->
-        <a
+        <!-- <img src="/ooo.png" alt="Company Logo" class="logo-image" /> -->
+        <!-- <a
           href="https://github.com/Amaan-Samar/chinese-writing-assistant"
           target="_blank"
           class="nav-link"
         >
           GitHub
-        </a>
+        </a> -->
       </div>
     </nav>
   </header>
@@ -22,13 +27,14 @@
 import { RouterLink } from 'vue-router'
 </script>
 
-<!-- <style scoped>
+<style scoped>
 .header {
-  max-width: 1200px;
-  width: 1000px;
-  background-color: #2c3e50;
-  color: white;
+  /* max-width: 100%; */
+  width: 100%;
+  background-color: white;
   padding: 1rem;
+  z-index: 10;
+  box-shadow: 0 3px 24px rgba(0, 0, 0, 0.08);
 }
 
 .nav-container {
@@ -40,9 +46,9 @@ import { RouterLink } from 'vue-router'
 }
 
 .logo {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: bold;
-  color: white;
+  color: black;
   text-decoration: none;
 }
 
@@ -56,84 +62,41 @@ import { RouterLink } from 'vue-router'
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
-  transition: background-color 0.3s;
-}
-
-.nav-link:hover {
-  background-color: #34495e;
-}
-</style> -->
-<style scoped>
-.header {
-  max-width: 1200px;
-  width: 100%; /* Changed to 100% for better responsiveness */
-  background-color: #2c3e50;
-  color: white;
-  padding: 1rem;
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logo {
-  font-size: 1.8rem; /* Increased size for better visibility */
-  font-weight: bold;
-  color: white;
-  text-decoration: none;
-}
-
-.nav-links {
-  display: flex;
-  gap: 1rem; /* Space between links */
-}
-
-.nav-link {
-  color: white;
-  text-decoration: none;
-  padding: 0.5rem 1rem; /* Consistent padding */
-  border-radius: 4px;
   transition:
     background-color 0.3s,
-    color 0.3s; /* Added color transition */
+    color 0.3s;
 }
 
 .nav-link:hover {
-  background-color: #34495e; /* Darker shade on hover */
+  background-color: #2c74e8;
 }
 
 /* Media Queries for Responsiveness */
 @media (max-width: 1024px) {
-  /* Tablet and smaller desktops */
   .logo {
-    font-size: 1.6rem; /* Slightly smaller logo */
+    font-size: 1.6rem;
   }
 
   .nav-link {
-    padding: 0.5rem; /* Adjust padding for smaller screens */
+    padding: 0.5rem;
   }
 }
 
 @media (max-width: 768px) {
-  /* Mobile devices */
   .nav-container {
-    flex-direction: column; /* Stack items vertically */
-    align-items: flex-start; /* Align items to the start */
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .nav-links {
-    flex-direction: column; /* Stack links vertically */
-    gap: 0.5rem; /* Reduce gap between links */
-    width: 100%; /* Full width for mobile navigation */
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
   }
 
   .nav-link {
-    width: 100%; /* Make links full width */
-    text-align: center; /* Center text in links */
+    width: 100%;
+    text-align: center;
   }
 }
 </style>
