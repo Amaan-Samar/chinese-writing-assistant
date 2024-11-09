@@ -3,9 +3,9 @@
     <nav class="nav-container">
       <RouterLink to="/" class="logo"> Writing Assistant </RouterLink>
       <div class="nav-links">
-        <RouterLink to="/" class="nav-link">Home</RouterLink>
-        <RouterLink to="/about" class="nav-link">About</RouterLink>
-        <RouterLink to="/converter" class="nav-link">Converter</RouterLink>
+        <!-- <RouterLink to="/" class="nav-link">Home</RouterLink> -->
+        <!-- <RouterLink to="/converter" class="nav-link">Converter</RouterLink> -->
+        <!-- <RouterLink to="/about" class="nav-link">About</RouterLink> -->
         <a
           href="https://github.com/Amaan-Samar/chinese-writing-assistant"
           target="_blank"

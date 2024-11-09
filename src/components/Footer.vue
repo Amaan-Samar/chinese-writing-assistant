@@ -12,9 +12,9 @@
       <div class="footer-section">
         <h4 class="footer-subtitle">Quick Links</h4>
         <nav class="footer-links">
-          <RouterLink to="/" class="footer-link">Home</RouterLink>
+          <!-- <RouterLink to="/" class="footer-link">Home</RouterLink> -->
           <RouterLink to="/about" class="footer-link">About</RouterLink>
-          <RouterLink to="/converter" class="footer-link">Converter</RouterLink>
+          <RouterLink to="/" class="footer-link">Converter</RouterLink>
         </nav>
       </div>
     </div>
