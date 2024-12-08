@@ -3,7 +3,6 @@
     <div class="controls-section">
       <div class="controls-container">
         <div class="font-selector">
-          <label for="font-select">Select Font:</label>
           <select id="font-select" v-model="selectedFont" class="select-input">
             <option value="kaiti">Kaiti</option>
             <option value="tegakizatsu">tegakizatsu</option>
@@ -13,7 +12,6 @@
         </div>
 
         <div class="size-selector">
-          <label for="size-select">Font Size:</label>
           <select id="size-select" v-model="fontSize" class="select-input">
             <option value="24">Small</option>
             <option value="32">Medium</option>
@@ -33,7 +31,7 @@
           ></textarea>
         </div>
 
-        <div class="text-section">
+        <!-- <div class="text-section">
           <div
             class="text-display"
             :style="{
@@ -43,10 +41,10 @@
           >
             {{ inputText || '示例文字 (Sample Text)' }}
           </div>
-        </div>
+        </div> -->
       </div>
 
-      <div class="comparison-section">
+      <div v-if="inputText.trim()" class="comparison-section">
         <h2>Comparison View</h2>
         <div class="comparison-display">
           <template v-if="inputText">
@@ -69,27 +67,28 @@
                       class="character-column"
                       :class="{ punctuation: isPunctuation(char) }"
                     >
-                      <div
-                        class="character converted-text"
-                        :style="{
-                          fontFamily: getFontFamily,
-                          fontSize: `${fontSize}px`,
-                        }"
-                      >
-                        {{ char }}
-                      </div>
-                      <div class="pinyin-text" v-if="!isPunctuation(char)">
-                        {{ getPinyinForChar(char) }}
-                      </div>
-                      <div
-                        class="character original-text"
-                        :style="{
+                    <div
+                    class="character original-text"
+                    :style="{
                           fontFamily: fonts.regular,
                           fontSize: `${fontSize}px`,
                         }"
                       >
-                        {{ char }}
-                      </div>
+                      {{ char }}
+                    </div>
+                    <div class="pinyin-text" v-if="!isPunctuation(char)">
+                      {{ getPinyinForChar(char) }}
+                    </div>
+                    <div
+                      class="character converted-text"
+                      :style="{
+                        fontFamily: getFontFamily,
+                        fontSize: `${fontSize}px`,
+                      }"
+                    >
+                      {{ char }}
+                    </div>
+
                     </div>
                   </div>
                 </div>
@@ -186,19 +185,17 @@ export default {
 }
 
 .converter-wrapper {
-  width: 100vw;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  /* gap: 2rem; */
-  padding: 1rem;
-  max-width: 700px;
-  margin: 0 auto;
+  padding-bottom: 10px;
 }
 
 .controls-section {
   width: 100%;
   position: sticky;
   top: 0;
+  padding-bottom: 10px;
   background-color: white;
   z-index: 10;
   padding: 1rem;
@@ -208,27 +205,27 @@ export default {
 
 .controls-container {
   display: flex;
-  gap: 2rem;
-  justify-content: center;
-  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 1rem;
+  justify-items: center;
 }
 
 .main-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  display: block; 
+  width: 100%;
+  padding-top: 0; 
 }
 
 .input-display-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(1200px, 2fr));
-  gap: 2rem;
+  display: block;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto; 
 }
 
 .text-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  width: 100%;
 }
 
 .text-input {
@@ -248,9 +245,14 @@ export default {
   border-radius: 4px;
   white-space: pre-wrap;
 }
-
+.comparison-section {
+  max-width: 1200px;
+  margin: 0 auto; /* This centers the comparison section */
+  padding: 1rem;
+}
 .comparison-display {
-  /* width: 1200px; */
+  max-width: 1200px;
+  margin: 0 auto; /* This ensures the display inside is also centered */
   padding: 1rem;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -320,13 +322,18 @@ export default {
 .size-selector {
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* Reduced gap for tighter layout */
+  gap: 0.5rem;
+}
+
+.font-selector select,
+.size-selector select {
+    width: 130px;
 }
 
 .select-input {
   padding: 0.5rem;
-  border-radius: 0.25rem; /* Smaller radius for inputs */
-  border: 0.5px solid #ddd; /* Slightly thinner border */
+  border-radius: 0.25rem;
+  border: 0.5px solid #ddd;
 }
 
 .placeholder-text {
@@ -335,7 +342,6 @@ export default {
   padding: 2rem;
 }
 
-/* Media Queries for Responsiveness */
 @media (max-width: 1024px) {
   .input-display-row {
     grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
@@ -348,7 +354,7 @@ export default {
 
 @media (max-width: 768px) {
   .controls-container {
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
   }
 

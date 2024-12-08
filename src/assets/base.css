@@ -28,15 +28,6 @@
   --handwriting-messy: 'Reenie Beanie', cursive;
 }
 
-/* Font Weight Variables */
-:root {
-  --hw-light: 300;
-  --hw-regular: 400;
-  --hw-medium: 500;
-  --hw-semibold: 600;
-  --hw-bold: 700;
-}
-
 /* Utility Classes for Different Handwriting Styles */
 .handwriting-casual {
   font-family: var(--handwriting-casual);
@@ -103,7 +94,7 @@
 }
 
 /* Size Variants */
-.hw-text-sm {
+/* .hw-text-sm {
   font-size: 1rem;
 }
 
@@ -117,15 +108,15 @@
 
 .hw-text-xl {
   font-size: 2rem;
-}
+} */
 
 /* Optional: Add some ink-like effects */
-.ink-effect {
+/* .ink-effect {
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
-}
+} */
 
 /* Optional: Add paper texture background */
-.paper-bg {
+/* .paper-bg {
   background-color: #fff;
   background-image: linear-gradient(
     0deg,
@@ -140,10 +131,10 @@
     transparent
   );
   background-size: 50px 50px;
-}
+} */
 
 /* Responsive adjustments */
-@media screen and (max-width: 768px) {
+/* @media screen and (max-width: 768px) {
   .hw-text-sm {
     font-size: 0.875rem;
   }
@@ -156,4 +147,4 @@
   .hw-text-xl {
     font-size: 1.75rem;
   }
-}
+} */

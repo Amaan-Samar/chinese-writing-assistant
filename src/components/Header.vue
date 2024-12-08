@@ -9,16 +9,6 @@
         />
         <span style="color: #656ee0"> Little</span>Hanzi
       </RouterLink>
-      <div class="nav-links">
-        <!-- <img src="/ooo.png" alt="Company Logo" class="logo-image" /> -->
-        <!-- <a
-          href="https://github.com/Amaan-Samar/chinese-writing-assistant"
-          target="_blank"
-          class="nav-link"
-        >
-          GitHub
-        </a>  -->
-      </div>
     </nav>
   </header>
 </template>
@@ -29,11 +19,10 @@ import { RouterLink } from 'vue-router'
 
 <style scoped>
 .header {
-  /* max-width: 100%; */
   width: 100%;
   background-color: white;
   padding: 1rem;
-  z-index: 10;
+  z-index: 12;
   box-shadow: 0 3px 24px rgba(0, 0, 0, 0.08);
 }
 
