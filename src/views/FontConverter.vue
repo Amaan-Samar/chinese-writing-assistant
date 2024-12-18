@@ -20,29 +20,18 @@
         </div>
       </div>
     </div>
-
+    
     <div class="main-content">
       <div class="input-display-row">
         <div class="text-section">
           <textarea
-            v-model="inputText"
-            placeholder="Enter Chinese text here..."
-            class="text-input"
+          v-model="inputText"
+          placeholder="Enter Chinese text here..."
+          class="text-input"
           ></textarea>
         </div>
-
-        <!-- <div class="text-section">
-          <div
-            class="text-display"
-            :style="{
-              fontFamily: getFontFamily,
-              fontSize: `${fontSize}px`,
-            }"
-          >
-            {{ inputText || '示例文字 (Sample Text)' }}
-          </div>
-        </div> -->
       </div>
+      <ChineseTextToSpeech :text="inputText" />
 
       <div v-if="inputText.trim()" class="comparison-section">
         <h2>Comparison View</h2>
@@ -67,28 +56,27 @@
                       class="character-column"
                       :class="{ punctuation: isPunctuation(char) }"
                     >
-                    <div
-                    class="character original-text"
-                    :style="{
+                      <div
+                        class="character original-text"
+                        :style="{
                           fontFamily: fonts.regular,
                           fontSize: `${fontSize}px`,
                         }"
                       >
-                      {{ char }}
-                    </div>
-                    <div class="pinyin-text" v-if="!isPunctuation(char)">
-                      {{ getPinyinForChar(char) }}
-                    </div>
-                    <div
-                      class="character converted-text"
-                      :style="{
-                        fontFamily: getFontFamily,
-                        fontSize: `${fontSize}px`,
-                      }"
-                    >
-                      {{ char }}
-                    </div>
-
+                        {{ char }}
+                      </div>
+                      <div class="pinyin-text" v-if="!isPunctuation(char)">
+                        {{ getPinyinForChar(char) }}
+                      </div>
+                      <div
+                        class="character converted-text"
+                        :style="{
+                          fontFamily: getFontFamily,
+                          fontSize: `${fontSize}px`,
+                        }"
+                      >
+                        {{ char }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -105,10 +93,15 @@
 </template>
 
 <script>
+import ChineseTextToSpeech from './ChineseTextToSpeech.vue'; // Adjust the path if 
 import { ref, computed } from 'vue'
 import { pinyin } from 'pinyin-pro'
 
+
 export default {
+  components: {
+    ChineseTextToSpeech,
+},
   name: 'FontConverter',
   setup() {
     const inputText = ref('')
@@ -212,16 +205,16 @@ export default {
 }
 
 .main-content {
-  display: block; 
+  display: block;
   width: 100%;
-  padding-top: 0; 
+  padding-top: 10px;
 }
 
 .input-display-row {
   display: block;
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto; 
+  margin: 0 auto;
 }
 
 .text-section {
@@ -230,10 +223,7 @@ export default {
 
 .text-input {
   width: 100%;
-  min-height: 300px;
-  padding: 1rem;
-  border: 3px dashed #bec0da;
-  background: #efeef3;
+  /* padding: 1rem; */
   border-radius: 4px;
   font-size: 16px;
 }
@@ -247,12 +237,12 @@ export default {
 }
 .comparison-section {
   max-width: 1200px;
-  margin: 0 auto; /* This centers the comparison section */
+  margin: 0 auto; 
   padding: 1rem;
 }
 .comparison-display {
   max-width: 1200px;
-  margin: 0 auto; /* This ensures the display inside is also centered */
+  margin: 0 auto; 
   padding: 1rem;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -327,7 +317,7 @@ export default {
 
 .font-selector select,
 .size-selector select {
-    width: 130px;
+  width: 130px;
 }
 
 .select-input {

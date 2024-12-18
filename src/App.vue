@@ -20,7 +20,6 @@ import Header from './components/Header.vue'
   height: 100vh;
   display: flex;
   flex-direction: column;
-  /* align-items: center; */
 }
 
 .main-content {

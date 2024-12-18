@@ -9,24 +9,4 @@
 html,
 body {
   font-family: Overpass, sans-serif;
-  /* font-family: var(--handwriting-friendly); */
-}
-#app {
-  /* margin: 0 auto;
-  padding: 2rem; */
-  font-weight: normal;
-}
-
-a,
-.green {
-  text-decoration: none;
-  transition: 0.4s;
-  padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: rgba(44, 116, 232, 0.2);
-    border-radius: 5%;
-  }
 }

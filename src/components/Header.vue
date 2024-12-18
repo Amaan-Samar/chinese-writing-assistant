@@ -1,14 +1,18 @@
 <template>
   <header class="header">
     <nav class="nav-container">
-      <RouterLink to="/" class="logo">
-        <img
-          src="/pen.svg"
-          style="width: 40px; height: 40px; margin-bottom: -8px"
-          alt="Company Logo"
-        />
-        <span style="color: #656ee0"> Little</span>Hanzi
-      </RouterLink>
+      <div class="logo_wrapper">
+        <RouterLink to="/" class="logo">
+          <img class="logo_img"
+            src="/pen.svg"
+            alt="Company Logo"
+          />
+          <span 
+          style="color: #656ee0"
+          > Little</span>Hanzi
+        </RouterLink>
+
+      </div>
     </nav>
   </header>
 </template>
@@ -33,59 +37,48 @@ import { RouterLink } from 'vue-router'
   justify-content: space-between;
   align-items: center;
 }
+.logo_img{
+  width: 30px;
+  height: 30px;
+  margin-bottom: -6px;
 
+}
+.logo_wrapper {
+  width: 100%; 
+}
 .logo {
   font-size: 1.8rem;
   font-weight: bold;
   color: black;
   text-decoration: none;
+  transition: transform 0.3s;
 }
 
-.nav-links {
-  display: flex;
-  gap: 1rem;
+.logo:hover {
+  transform: scale(1.05); /* Scale the button up by 5% on hover */
 }
 
-.nav-link {
-  color: white;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  transition:
-    background-color 0.3s,
-    color 0.3s;
-}
-
-.nav-link:hover {
-  background-color: #2c74e8;
-}
-
-/* Media Queries for Responsiveness */
 @media (max-width: 1024px) {
+  .logo_wrapper {
+    width: auto; 
+    display: flex; 
+    justify-content: center; 
+    padding: .5rem; 
+    border-radius: .5rem; 
+    transition: background-color .3s; 
+    cursor: pointer; 
+   }
   .logo {
-    font-size: 1.6rem;
-  }
-
-  .nav-link {
-    padding: 0.5rem;
-  }
+     font-size: 1rem;
+     display: inline-flex;
+     gap:.5rem; 
+   }
 }
 
 @media (max-width: 768px) {
-  .nav-container {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .nav-links {
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .nav-link {
-    width: 100%;
-    text-align: center;
-  }
+   .nav-container {
+      flex-direction: column; 
+      align-items: center;
+   }
 }
 </style>
