@@ -25,13 +25,14 @@
       <div class="input-display-row">
         <div class="text-section">
           <textarea
-          v-model="inputText"
-          placeholder="Enter Chinese text here..."
-          class="text-input"
+            v-model="inputText"
+            placeholder="Enter Chinese text here..."
+            class="text-input"
           ></textarea>
         </div>
       </div>
       <ChineseTextToSpeech
+      style="max-width: 1200px;"
        :text="inputText" />
 
       <div v-if="inputText.trim()" class="comparison-section">
@@ -224,7 +225,7 @@ export default {
 
 .text-input {
   width: 100%;
-  /* padding: 1rem; */
+  padding-left: 1.5rem;
   border-radius: 4px;
   font-size: 16px;
 }
@@ -338,6 +339,10 @@ export default {
     grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
   }
 
+  .text-input{
+    padding-left: 1.5rem;
+  }
+
   .character-column {
     min-width: auto;
   }
@@ -347,6 +352,10 @@ export default {
   .controls-container {
     flex-direction: row;
     align-items: flex-start;
+  }
+
+  .text-input{
+    padding-left: 1.5rem;
   }
 
   .text-input,

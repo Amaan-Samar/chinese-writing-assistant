@@ -1,10 +1,12 @@
 <template>
-  <div>
-    <div>
+    <div 
+    style="max-width: 1200px;"
+    class="speaker mx-auto"
+    >
       <div>
         <button 
           @click="toggleSpeech" 
-          class="px-4 py-2 text-white rounded-lg disabled:opacity-50 transition"
+          class="text-white rounded-lg disabled:opacity-50 transition"
           :disabled="!canSpeak"
         >
           <component :is="isSpeaking ? 'StopIcon' : 'SpeakerIcon'" width="24" height="24" />
@@ -24,7 +26,6 @@
         您的浏览器不支持语音合成。(Your browser doesn't support speech synthesis.)
       </div>
     </div>
-  </div>
 </template>
 
 
@@ -47,7 +48,6 @@ export default {
   
   data() {
     return {
-      // text: '你好，世界！',
       isSpeaking: false,
       errorMessage: '',
       isSpeechSupported: 'speechSynthesis' in window,
@@ -74,10 +74,10 @@ export default {
       try {
         this.errorMessage = '';
         
-        this.speechSynthesis.cancel(); // Stop any ongoing speech
+        this.speechSynthesis.cancel();
         
         const currentUtterance = new SpeechSynthesisUtterance(this.text);
-        currentUtterance.lang = 'zh-CN'; // Set language to Chinese
+        currentUtterance.lang = 'zh-CN';
 
         currentUtterance.onstart = () => {
           this.isSpeaking = true;
@@ -122,3 +122,19 @@ export default {
   }
 }
 </script>
+<style scoped>
+.speaker{
+  padding-left: 1.5rem;
+}
+@media (max-width: 1024px) {
+.speaker{
+  padding-left: 1.5rem;
+ }
+}
+
+@media (max-width: 768px) {
+ .speaker{
+  padding-left: 1.5rem;
+ }
+}
+</style>

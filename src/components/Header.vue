@@ -40,7 +40,7 @@ import { RouterLink } from 'vue-router'
 .logo_img{
   width: 30px;
   height: 30px;
-  margin-bottom: -6px;
+  /* margin-bottom: -6px; */
 
 }
 .logo_wrapper {
@@ -51,6 +51,10 @@ import { RouterLink } from 'vue-router'
   font-weight: bold;
   color: black;
   text-decoration: none;
+    display: flex;
+  align-items: center; 
+  gap:.5rem; 
+
   transition: transform 0.3s;
 }
 
