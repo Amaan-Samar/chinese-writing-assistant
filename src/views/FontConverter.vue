@@ -31,7 +31,8 @@
           ></textarea>
         </div>
       </div>
-      <ChineseTextToSpeech :text="inputText" />
+      <ChineseTextToSpeech
+       :text="inputText" />
 
       <div v-if="inputText.trim()" class="comparison-section">
         <h2>Comparison View</h2>
