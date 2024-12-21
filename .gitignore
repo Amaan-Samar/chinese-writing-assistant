@@ -17,7 +17,7 @@ coverage
 
 /cypress/videos/
 /cypress/screenshots/
-
+src/views/FontConverter_copy.vue
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

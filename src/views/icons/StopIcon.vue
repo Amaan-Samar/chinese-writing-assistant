@@ -6,7 +6,7 @@
       height="24"
       class="stop-icon"
     >
-    <rect x="0" y="0" width="20" height="20" fill="#0a0a0a"/>
+    <rect x="0" y="0" width="20" height="20" fill="rgba(10, 10, 10,0.5)"/>
 
     </svg>
   </template>
@@ -16,10 +16,5 @@
     name: 'StopIcon',
   };
   </script>
-  
-  <style scoped>
-  .stop-icon:hover {
-    fill: #0490ec;
-  }
-  </style>
+
   

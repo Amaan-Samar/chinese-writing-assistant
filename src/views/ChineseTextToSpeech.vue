@@ -1,31 +1,21 @@
 <template>
-    <div 
-    style="max-width: 1200px;"
-    class="speaker mx-auto"
-    >
-      <div>
-        <button 
-          @click="toggleSpeech" 
-          class="text-white rounded-lg disabled:opacity-50 transition"
-          :disabled="!canSpeak"
-        >
-          <component :is="isSpeaking ? 'StopIcon' : 'SpeakerIcon'" width="24" height="24" />
-        </button>
-      </div>
-
-      <div 
-        v-if="errorMessage" 
-        class="hidden"
-      >
-        {{ errorMessage }}
-      </div>
-
-      <div 
-        v-if="!isSpeechSupported" 
-      >
-        您的浏览器不支持语音合成。(Your browser doesn't support speech synthesis.)
-      </div>
+  <div style="max-width: 1200px;" class="speaker mx-auto">
+    <div>
+      <button @click="toggleSpeech" 
+              class="text-white rounded-lg disabled:opacity-50 transition"
+              :disabled="!canSpeak">
+        <component :is="isSpeaking ? 'StopIcon' : 'SpeakerIcon'" width="24" height="24" />
+      </button>
     </div>
+
+    <div v-if="errorMessage" class="hidden">
+      {{ errorMessage }}
+    </div>
+
+    <div v-if="!isSpeechSupported">
+      您的浏览器不支持语音合成。(Your browser doesn't support speech synthesis.)
+    </div>
+  </div>
 </template>
 
 
@@ -48,6 +38,7 @@ export default {
   
   data() {
     return {
+      currentWordIndex: 0,
       isSpeaking: false,
       errorMessage: '',
       isSpeechSupported: 'speechSynthesis' in window,
@@ -75,6 +66,7 @@ export default {
         this.errorMessage = '';
         
         this.speechSynthesis.cancel();
+
         
         const currentUtterance = new SpeechSynthesisUtterance(this.text);
         currentUtterance.lang = 'zh-CN';
@@ -126,6 +118,7 @@ export default {
 .speaker{
   padding-left: 1.5rem;
 }
+
 @media (max-width: 1024px) {
 .speaker{
   padding-left: 1.5rem;

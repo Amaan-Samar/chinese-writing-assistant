@@ -5,12 +5,10 @@
         <div class="font-selector">
           <select id="font-select" v-model="selectedFont" class="select-input">
             <option value="kaiti">Kaiti</option>
-            <option value="tegakizatsu">tegakizatsu</option>
-            <option value="stroke5">Stroke5</option>
+            <option value="tegakizatsu">Tegakizatsu</option>
             <option value="regular">Regular</option>
           </select>
         </div>
-
         <div class="size-selector">
           <select id="size-select" v-model="fontSize" class="select-input">
             <option value="24">Small</option>
@@ -20,63 +18,51 @@
         </div>
       </div>
     </div>
-    
+
     <div class="main-content">
       <div class="input-display-row">
         <div class="text-section">
-          <textarea
-            v-model="inputText"
-            placeholder="Enter Chinese text here..."
-            class="text-input"
-          ></textarea>
+          <textarea v-model="inputText" placeholder="Enter Chinese text here..." class="text-input w-full resize-none" @input="adjustHeight" ref="textarea"></textarea>
         </div>
       </div>
-      <ChineseTextToSpeech
-      style="max-width: 1200px;"
-       :text="inputText" />
 
-      <div v-if="inputText.trim()" class="comparison-section">
+      <ChineseTextToSpeech style="max-width: 1200px;" :text="inputText" />
+
+      <!-- <div v-if="inputText.trim()" class="comparison-section">
         <h2>Comparison View</h2>
         <div class="comparison-display">
           <template v-if="inputText">
-            <div
-              v-for="(block, index) in textBlocks"
-              :key="index"
-              class="comparison-block"
-            >
+            <div v-for="(block, index) in textBlocks" :key="index" class="comparison-block">
               <p class="block-number">Block {{ index + 1 }}</p>
               <div class="line-container">
-                <div
-                  v-for="(line, lineIndex) in splitIntoLines(block)"
-                  :key="lineIndex"
-                  class="text-line"
-                >
+                <div v-for="(line, lineIndex) in splitIntoLines(block)" :key="lineIndex" class="text-line">
                   <div class="character-container">
-                    <div
-                      v-for="(char, charIndex) in line"
-                      :key="charIndex"
-                      class="character-column"
+                    <div v-for="(char, charIndex) in line"
+                     :key="charIndex" 
+                      class="character-column" 
                       :class="{ punctuation: isPunctuation(char) }"
                     >
-                      <div
-                        class="character original-text"
-                        :style="{
-                          fontFamily: fonts.regular,
-                          fontSize: `${fontSize}px`,
-                        }"
+                      <div class="character original-text" 
+                      :style="{ 
+                        fontFamily: fonts.regular,
+                        fontSize: `${fontSize}px` }"
                       >
-                        {{ char }}
+                          {{ char }}
                       </div>
-                      <div class="pinyin-text" v-if="!isPunctuation(char)">
+
+                      <div class="pinyin-text" v-if="!isPunctuation(char)" 
+                      :style="{ 
+                        fontFamily: getFontFamily, 
+                        fontSize: `${fontSize * 0.8}px` }"
+                      >
                         {{ getPinyinForChar(char) }}
                       </div>
-                      <div
-                        class="character converted-text"
-                        :style="{
+
+                      <div class="character converted-text" 
+                        :style="{ 
                           fontFamily: getFontFamily,
-                          fontSize: `${fontSize}px`,
-                        }"
-                      >
+                          fontSize: `${fontSize}px` }"
+                        >
                         {{ char }}
                       </div>
                     </div>
@@ -85,74 +71,157 @@
               </div>
             </div>
           </template>
-          <div v-else class="placeholder-text">
-            Enter text to see the comparison
-          </div>
+          <div v-else class="placeholder-text">Enter text to see the comparison</div>
+        </div>
+      </div> -->
+      <div v-if="inputText.trim()" class="comparison-section">
+        <h2>Comparison View</h2>
+        <div class="comparison-display">
+          <template v-if="comparisonData && Object.keys(comparisonData).length">
+            <div v-for="(lines, sentenceId) in comparisonData" :key="sentenceId" class="comparison-block">
+              <p class="block-number">Block {{ parseInt(sentenceId) + 1 }}</p>
+              <div class="line-container">
+                <div v-for="(line, lineIndex) in lines" :key="lineIndex" class="text-line">
+                  <div class="character-container">
+                    <ChineseTextToSpeech style="max-width: 1200px;" :text="line" />
+                    <div v-for="(char, charIndex) in line" 
+                        :key="charIndex" 
+                        class="character-column" 
+                        :class="{ punctuation: isPunctuation(char) }">
+                      <div class="character original-text" 
+                          :style="{ 
+                            fontFamily: fonts.regular,
+                            fontSize: `${fontSize}px` }">
+                        {{ char }}
+                      </div>
+
+                      <div class="pinyin-text" v-if="!isPunctuation(char)" 
+                          :style="{ 
+                            fontFamily: getFontFamily, 
+                            fontSize: `${fontSize * 0.8}px` }">
+                        {{ getPinyinForChar(char) }}
+                      </div>
+
+                      <div class="character converted-text" 
+                          :style="{ 
+                            fontFamily: getFontFamily,
+                            fontSize: `${fontSize}px` }">
+                        {{ char }}
+                      </div>
+
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+          <div v-else class="placeholder-text">Enter text to see the comparison</div>
         </div>
       </div>
+
     </div>
   </div>
 </template>
 
 <script>
-import ChineseTextToSpeech from './ChineseTextToSpeech.vue'; // Adjust the path if 
-import { ref, computed } from 'vue'
-import { pinyin } from 'pinyin-pro'
-
+import ChineseTextToSpeech from './ChineseTextToSpeech.vue'; // Adjust the path if necessary
+import { ref, computed, watch } from 'vue';
+import { pinyin } from 'pinyin-pro';
 
 export default {
   components: {
     ChineseTextToSpeech,
-},
+  },
   name: 'FontConverter',
   setup() {
-    const inputText = ref('')
-    const selectedFont = ref('kaiti')
-    const fontSize = ref(32)
+    const inputText = ref('');
+    const selectedFont = ref('kaiti');
+    const fontSize = ref(32);
+    const textarea = ref(null);
 
     const fonts = {
       kaiti: "'Kaiti', '楷体', serif",
       tegakizatsu: "'tegakizatsu', serif",
-      stroke5: "'Stroke5', serif",
       regular: "'SimSun', '宋体', serif",
-    }
+    };
 
-    const getFontFamily = computed(() => fonts[selectedFont.value])
+    const getFontFamily = computed(() => fonts[selectedFont.value]);
 
     const textBlocks = computed(() => {
-      if (!inputText.value) return []
+      if (!inputText.value) return [];
 
       const sentences =
-        inputText.value.match(/[^。.!?！？]+[。.!?！？]+/g) || []
-      const remainingText = inputText.value.match(/[^。.!?！？]+$/)
+        inputText.value.match(/[^。.!?！？]+[。.!?！？]+/g) || [];
+      const remainingText = inputText.value.match(/[^。.!?！？]+$/);
 
       if (remainingText) {
-        sentences.push(remainingText[0])
+        sentences.push(remainingText[0]);
       }
-
-      return sentences.filter(sentence => sentence.trim())
-    })
+      console.log(sentences.filter(sentence => sentence.trim()));
+      return sentences.filter(sentence => sentence.trim());
+    });
 
     const splitIntoLines = text => {
       return text
         .split('，')
         .map(line => line.trim())
-        .filter(line => line)
-    }
+        .filter(line => line);
+    };
+    const comparisonData = computed(() => {
+      if (!inputText.value) return {};
+      
+      const sentences =
+        inputText.value.match(/[^。.!?！？]+[。.!?！？]+/g) || [];
+      const remainingText = inputText.value.match(/[^。.!?！？]+$/);
+      
+      if (remainingText) {
+        sentences.push(remainingText[0]);
+      }
+      
+      const result = {};
+      
+      sentences.filter(sentence => sentence.trim()).forEach((sentence, index) => {
+        const sentenceId = index;
+        result[sentenceId] = {};
+        
+        const lines = splitIntoLines(sentence);
+        
+        lines.forEach((line, lineIndex) => {
+          const lineId = lineIndex;
+          result[sentenceId][lineId] = line; 
+        });
+      });
+      
+      return result;
+    });
 
     const isPunctuation = char => {
-      const punctuationRegex = /[《》【】（）！？。，、：；'"『』「」]/
-      return punctuationRegex.test(char)
-    }
+      const punctuationRegex = /[《》【】（）！？。，、：；'"『』「」]/;
+      return punctuationRegex.test(char);
+    };
 
     const getPinyinForChar = char => {
-      if (isPunctuation(char)) return ''
+      if (isPunctuation(char)) return '';
       return pinyin(char, {
         toneType: 'symbol',
         type: 'array',
         nonZh: 'consecutive',
-      })[0]
-    }
+      })[0];
+    };
+
+    const adjustHeight = () => {
+      if (textarea.value) {
+        textarea.value.style.height = 'auto'; // Reset height to auto
+        textarea.value.style.height = `${textarea.value.scrollHeight}px`;
+      }
+    };
+
+    watch(inputText, adjustHeight);
+
+    watch(comparisonData, (newValue) => {
+      console.log('Comparison Data:', JSON.stringify(newValue, null, 2));
+    });
 
     return {
       inputText,
@@ -160,15 +229,17 @@ export default {
       fontSize,
       getFontFamily,
       textBlocks,
+      comparisonData,
       fonts,
       splitIntoLines,
       isPunctuation,
       getPinyinForChar,
-    }
+      adjustHeight,
+      textarea,
+    };
   },
-}
+};
 </script>
-
 <style scoped>
 @font-face {
   font-family: 'tegakizatsu';
@@ -224,10 +295,10 @@ export default {
 }
 
 .text-input {
-  width: 100%;
   padding-left: 1.5rem;
   border-radius: 4px;
   font-size: 16px;
+  outline: none; 
 }
 
 .text-display {
