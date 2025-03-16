@@ -8,10 +8,9 @@
             alt="Company Logo"
           />
           <span 
-          style="color: #656ee0"
-          > Little</span>Hanzi
+              style="color: #656ee0"
+            > Little</span>Hanzi
         </RouterLink>
-
       </div>
     </nav>
   </header>
@@ -25,9 +24,9 @@ import { RouterLink } from 'vue-router'
 .header {
   width: 100%;
   background-color: white;
-  padding: 1rem;
+  padding: 1rem 1rem 0 1rem;
   z-index: 12;
-  box-shadow: 0 3px 24px rgba(0, 0, 0, 0.08);
+  /* box-shadow: 0 3px 24px rgba(0, 0, 0, 0.08); */
 }
 
 .nav-container {
@@ -40,7 +39,6 @@ import { RouterLink } from 'vue-router'
 .logo_img{
   width: 30px;
   height: 30px;
-  /* margin-bottom: -6px; */
 
 }
 .logo_wrapper {
@@ -84,5 +82,8 @@ import { RouterLink } from 'vue-router'
       flex-direction: column; 
       align-items: center;
    }
+   .logo_wrapper {
+      display: none;
+    }
 }
 </style>

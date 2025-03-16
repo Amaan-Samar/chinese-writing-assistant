@@ -1,9 +1,10 @@
 <template>
   <div class="converter-wrapper">
-    <div class="controls-section">
+    <!-- <div class="controls-section">
       <div class="controls-container">
         <div class="font-selector">
           <select id="font-select" v-model="selectedFont" class="select-input">
+            <option value="kaiti">Kaiti</option>
             <option value="kaiti">Kaiti</option>
             <option value="tegakizatsu">Tegakizatsu</option>
             <option value="regular">Regular</option>
@@ -11,96 +12,60 @@
         </div>
         <div class="size-selector">
           <select id="size-select" v-model="fontSize" class="select-input">
-            <option value="24">Small</option>
-            <option value="32">Medium</option>
-            <option value="48">Large</option>
+            <option value="8">Extra Small</option>
+            <option value="12">Small</option>
+            <option value="24">Medium</option>
+            <option value="36">Large</option>
+            <option value="48">Extra Large</option>
           </select>
         </div>
       </div>
-    </div>
+    </div>  -->
 
     <div class="main-content">
       <div class="input-display-row">
-        <div class="text-section">
+        <div class="text-section" :style="{fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
           <textarea v-model="inputText" placeholder="Enter Chinese text here..." class="text-input w-full resize-none" @input="adjustHeight" ref="textarea"></textarea>
         </div>
       </div>
+      <!-- <ChineseTextToSpeech style="max-width: 1200px;" :text="inputText" /> -->
 
-      <ChineseTextToSpeech style="max-width: 1200px;" :text="inputText" />
-
-      <!-- <div v-if="inputText.trim()" class="comparison-section">
-        <h2>Comparison View</h2>
-        <div class="comparison-display">
-          <template v-if="inputText">
-            <div v-for="(block, index) in textBlocks" :key="index" class="comparison-block">
-              <p class="block-number">Block {{ index + 1 }}</p>
-              <div class="line-container">
-                <div v-for="(line, lineIndex) in splitIntoLines(block)" :key="lineIndex" class="text-line">
-                  <div class="character-container">
-                    <div v-for="(char, charIndex) in line"
-                     :key="charIndex" 
-                      class="character-column" 
-                      :class="{ punctuation: isPunctuation(char) }"
-                    >
-                      <div class="character original-text" 
-                      :style="{ 
-                        fontFamily: fonts.regular,
-                        fontSize: `${fontSize}px` }"
-                      >
-                          {{ char }}
-                      </div>
-
-                      <div class="pinyin-text" v-if="!isPunctuation(char)" 
-                      :style="{ 
-                        fontFamily: getFontFamily, 
-                        fontSize: `${fontSize * 0.8}px` }"
-                      >
-                        {{ getPinyinForChar(char) }}
-                      </div>
-
-                      <div class="character converted-text" 
-                        :style="{ 
-                          fontFamily: getFontFamily,
-                          fontSize: `${fontSize}px` }"
-                        >
-                        {{ char }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-          <div v-else class="placeholder-text">Enter text to see the comparison</div>
-        </div>
-      </div> -->
       <div v-if="inputText.trim()" class="comparison-section">
-        <h2>Comparison View</h2>
-        <div class="comparison-display">
+        <div class="comparison-display relative">
+            <!-- <button @click="copyToClipboard(getAllText(), 'parent')" class="copy-btn parent-copy-btn" title="Copy all text">
+              <component :is="copiedStates.parent ? 'CopiedIcon' : 'CopyIcon'" />
+            </button> -->
           <template v-if="comparisonData && Object.keys(comparisonData).length">
-            <div v-for="(lines, sentenceId) in comparisonData" :key="sentenceId" class="comparison-block">
-              <p class="block-number">Block {{ parseInt(sentenceId) + 1 }}</p>
+            <div v-for="(block, sentenceId) in comparisonData" :key="sentenceId" class="comparison-block relative">
+              <!-- <p class="block-number">B {{ parseInt(sentenceId) + 1 }}</p> -->
+
+              <!-- <button @click="copyToClipboard(getBlockText(block.lines), `block-${sentenceId}`)" class="copy-btn block-copy-btn" title="Copy block">
+                <component :is="copiedStates[`block-${sentenceId}`] ? 'CopiedIcon' : 'CopyIcon'" />
+              </button> -->
+              
+              <!-- Display sentence-level pinyin -->
+              
               <div class="line-container">
-                <div v-for="(line, lineIndex) in lines" :key="lineIndex" class="text-line">
+                <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
+                  <!-- <button @click="copyToClipboard(line.text, `line-${sentenceId}-${lineIndex}`)" class="copy-btn line-copy-btn" title="Copy line">
+                    <component :is="copiedStates[`line-${sentenceId}-${lineIndex}`] ? 'CopiedIcon' : 'CopyIcon'" />
+                  </button> -->
+                  
+                  <!-- Display line-level pinyin -->
+                  
                   <div class="character-container">
-                    <ChineseTextToSpeech style="max-width: 1200px;" :text="line" />
-                    <div v-for="(char, charIndex) in line" 
+                    <!-- <ChineseTextToSpeech style="max-width: 1200px;" :text="line.text" /> -->
+                    <div v-for="(char, charIndex) in line.text" 
                         :key="charIndex" 
                         class="character-column" 
                         :class="{ punctuation: isPunctuation(char) }">
-                      <div class="character original-text" 
-                          :style="{ 
-                            fontFamily: fonts.regular,
-                            fontSize: `${fontSize}px` }">
-                        {{ char }}
-                      </div>
 
-                      <div class="pinyin-text" v-if="!isPunctuation(char)" 
-                          :style="{ 
-                            fontFamily: getFontFamily, 
-                            fontSize: `${fontSize * 0.8}px` }">
-                        {{ getPinyinForChar(char) }}
-                      </div>
+                        <div class="pinyin-text" v-if="!isPunctuation(char)" 
+                            :style="{ 
+                              fontFamily: getFontFamily, 
+                              fontSize: `${fontSize * 0.8}px` }">
+                          {{ getPinyinForChar(char) }}
+                        </div>
 
                       <div class="character converted-text" 
                           :style="{ 
@@ -108,37 +73,51 @@
                             fontSize: `${fontSize}px` }">
                         {{ char }}
                       </div>
-
-                      
                     </div>
                   </div>
+
+                  <!-- <div class="line-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize * 0.8}px` }">
+                    {{ line.pinyin }}
+                  </div> -->
+
                 </div>
               </div>
             </div>
           </template>
-          <div v-else class="placeholder-text">Enter text to see the comparison</div>
+          
+          <div v-else class="placeholder-text">
+            Enter text to see the comparison
+            <div class="sentence-pinyin">{{ block.sentencePinyin }}</div> 
+          </div>
+
         </div>
       </div>
-
     </div>
   </div>
 </template>
-
 <script>
-import ChineseTextToSpeech from './ChineseTextToSpeech.vue'; // Adjust the path if necessary
-import { ref, computed, watch } from 'vue';
+import CopyIcon from './icons/CopyIcon.vue';
+import CopiedIcon from './icons/CopiedIcon.vue';
+import ChineseTextToSpeech from './ChineseTextToSpeech.vue'; 
+import { ref, computed, watch, reactive } from 'vue';
 import { pinyin } from 'pinyin-pro';
 
 export default {
   components: {
     ChineseTextToSpeech,
+    CopiedIcon,
+    CopyIcon,
   },
   name: 'FontConverter',
   setup() {
     const inputText = ref('');
-    const selectedFont = ref('kaiti');
-    const fontSize = ref(32);
+    const fontSize = ref(12);
+    const selectedFont = ref('regular');
+    // const selectedFont = ref('kaiti');
     const textarea = ref(null);
+
+    const copiedStates = reactive({});
+    const COPIED_ICON_DURATION = 3000;
 
     const fonts = {
       kaiti: "'Kaiti', '楷体', serif",
@@ -163,11 +142,18 @@ export default {
     });
 
     const splitIntoLines = text => {
-      return text
-        .split('，')
-        .map(line => line.trim())
+      const parts = text.split('，');
+      return parts
+        .map((line, index) => {
+          if (index < parts.length - 1 || text.endsWith('，')) {
+            return line.trim() + '，';
+          } else {
+            return line.trim();
+          }
+        })
         .filter(line => line);
     };
+
     const comparisonData = computed(() => {
       if (!inputText.value) return {};
       
@@ -183,13 +169,20 @@ export default {
       
       sentences.filter(sentence => sentence.trim()).forEach((sentence, index) => {
         const sentenceId = index;
-        result[sentenceId] = {};
+        // result[sentenceId] = {};
+        result[sentenceId] = {
+          lines: {},
+          sentencePinyin: getPinyinForSentence(sentence)
+        };
         
         const lines = splitIntoLines(sentence);
         
         lines.forEach((line, lineIndex) => {
           const lineId = lineIndex;
-          result[sentenceId][lineId] = line; 
+          result[sentenceId].lines[lineId] = {
+            text: line,
+            pinyin: getPinyinForSentence(line)
+          };
         });
       });
       
@@ -210,6 +203,17 @@ export default {
       })[0];
     };
 
+    const getPinyinForSentence = sentence => {
+      if (!sentence) return '';
+      
+      return sentence
+        .split('')
+        .map(char => getPinyinForChar(char))
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
+
     const adjustHeight = () => {
       if (textarea.value) {
         textarea.value.style.height = 'auto'; // Reset height to auto
@@ -223,7 +227,64 @@ export default {
       console.log('Comparison Data:', JSON.stringify(newValue, null, 2));
     });
 
+    const copyToClipboard = (text, buttonId) => {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          // Set this specific button to "copied" state
+          copiedStates[buttonId] = true;
+          
+          // Set a timeout to revert back to the copy icon after COPIED_ICON_DURATION
+          setTimeout(() => {
+            copiedStates[buttonId] = false;
+          }, COPIED_ICON_DURATION);
+        })
+        .catch(err => {
+          console.error('Failed to copy text: ', err);
+        });
+    };
+    
+    const showCopySuccess = () => {
+      const toast = document.createElement('div');
+      toast.textContent = 'Copied to clipboard!';
+      toast.className = 'copy-toast';
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => {
+            document.body.removeChild(toast);
+          }, 300);
+        }, 2000);
+      }, 10);
+    };
+    
+    const getAllText = () => {
+      let allText = '';
+      if (comparisonData) {
+        for (const sentenceId in comparisonData) {
+          const lines = comparisonData[sentenceId];
+          for (const line of lines) {
+            allText += line + '\n';
+          }
+        }
+      }
+      return allText.trim();
+    };
+    
+    // const getBlockText = (lines) => {
+    //   return lines.join('\n');
+    // };
+    const getBlockText = (lines) => {
+      return Object.values(lines).map(line => line.text).join('，');
+    };
+
     return {
+      copyToClipboard,
+      showCopySuccess,
+      getAllText,
+      getBlockText,
       inputText,
       selectedFont,
       fontSize,
@@ -236,6 +297,7 @@ export default {
       getPinyinForChar,
       adjustHeight,
       textarea,
+      copiedStates,
     };
   },
 };
@@ -247,8 +309,74 @@ export default {
 }
 @font-face {
   font-family: 'kaiti';
+  /* font-family: 'kaiti'; */
   src: url('/fonts/kaiti.ttf') format('truetype');
+  /* src: url('/fonts/kaiti.ttf') format('truetype'); */
 }
+
+
+.relative {
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(240, 240, 240, 0.8);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s, background-color 0.2s;
+  z-index: 10;
+}
+
+.copy-btn:hover {
+  opacity: 1;
+  background-color: rgba(220, 220, 220, 0.9);
+}
+
+.parent-copy-btn {
+  top: 10px;
+  right: 10px;
+  padding: 6px;
+}
+
+.block-copy-btn {
+  top: 10px;
+  right: 10px;
+  padding: 5px;
+}
+
+.line-copy-btn {
+  top: 5px;
+  right: 5px;
+  padding: 4px;
+}
+
+/* Optional: Add styles for toast notification */
+.copy-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.copy-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+
 
 .converter-wrapper {
   width: 100%;
@@ -261,12 +389,12 @@ export default {
   width: 100%;
   position: sticky;
   top: 0;
-  padding-bottom: 10px;
+  /* padding-bottom: 10px; */
   background-color: white;
   z-index: 10;
-  padding: 1rem;
-  border-bottom: 1px solid #eee;
-  box-shadow: 0 3px 24px rgba(0, 0, 0, 0.08);
+  /* padding: 1rem; */
+  /* border-bottom: 1px solid #eee; */
+  /* box-shadow: 0 3px 24px rgba(0, 0, 0, 0.08); */
 }
 
 .controls-container {
@@ -280,7 +408,7 @@ export default {
 .main-content {
   display: block;
   width: 100%;
-  padding-top: 10px;
+  /* padding-top: 10px; */
 }
 
 .input-display-row {
@@ -316,28 +444,28 @@ export default {
 .comparison-display {
   max-width: 1200px;
   margin: 0 auto; 
-  padding: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  /* padding: 1rem; */
+  /* border: 1px solid #ddd; */
+  /* border-radius: 4px; */
 }
 
-.comparison-block {
+/* .comparison-block {
   margin-bottom: 2rem;
   padding: 1rem;
   border: 1px solid #eee;
-}
+} */
 
 .line-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  /* gap: 0.5rem; */
 }
 
 .text-line {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.5rem;
+  /* gap: 0.5rem; */
+  /* padding: 0.5rem; */
   background-color: white;
   border-radius: 0.25rem;
 }
@@ -345,7 +473,7 @@ export default {
 .character-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  /* gap: 0.75rem; */
   align-items: flex-start;
 }
 
@@ -378,7 +506,7 @@ export default {
 .block-number {
   font-size: 0.875rem;
   color: #666;
-  margin-bottom: 0.5rem;
+  /* margin-bottom: 0.5rem; */
 }
 
 .font-selector,
