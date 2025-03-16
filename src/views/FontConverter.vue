@@ -26,6 +26,10 @@
       <div class="input-display-row">
         <div class="text-section" :style="{fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
           <textarea v-model="inputText" placeholder="Enter Chinese text here..." class="text-input w-full resize-none" @input="adjustHeight" ref="textarea"></textarea>
+          <!-- <button @click="clearText" class="clear-button">Clear</button> -->
+          <button @click="clearOrPasteText" class="toggle-button">
+            {{ inputText.trim() ? 'Clear' : 'Paste' }}
+          </button>
         </div>
       </div>
       <!-- <ChineseTextToSpeech style="max-width: 1200px;" :text="inputText" /> -->
@@ -44,17 +48,27 @@
               </button> -->
               
               <!-- Display sentence-level pinyin -->
-              
               <div class="line-container">
                 <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
-                  <!-- <button @click="copyToClipboard(line.text, `line-${sentenceId}-${lineIndex}`)" class="copy-btn line-copy-btn" title="Copy line">
+                  <div class="line-characters" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
+                    {{ line.text }}
+                  </div>
+
+                  <div class="line-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize * 0.8}px` }">
+                    {{ line.pinyin }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- <div class="line-container">
+                <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
+                  <button @click="copyToClipboard(line.text, `line-${sentenceId}-${lineIndex}`)" class="copy-btn line-copy-btn" title="Copy line">
                     <component :is="copiedStates[`line-${sentenceId}-${lineIndex}`] ? 'CopiedIcon' : 'CopyIcon'" />
-                  </button> -->
+                  </button>
                   
-                  <!-- Display line-level pinyin -->
                   
                   <div class="character-container">
-                    <!-- <ChineseTextToSpeech style="max-width: 1200px;" :text="line.text" /> -->
+                    <ChineseTextToSpeech style="max-width: 1200px;" :text="line.text" />
                     <div v-for="(char, charIndex) in line.text" 
                         :key="charIndex" 
                         class="character-column" 
@@ -76,18 +90,19 @@
                     </div>
                   </div>
 
-                  <!-- <div class="line-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize * 0.8}px` }">
+                  <div class="line-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize * 0.8}px` }">
                     {{ line.pinyin }}
-                  </div> -->
+                  </div>
 
                 </div>
-              </div>
+              </div> -->
             </div>
+
           </template>
           
           <div v-else class="placeholder-text">
             Enter text to see the comparison
-            <div class="sentence-pinyin">{{ block.sentencePinyin }}</div> 
+            <!-- <div class="sentence-pinyin">{{ block.sentencePinyin }}</div>  -->
           </div>
 
         </div>
@@ -111,7 +126,7 @@ export default {
   name: 'FontConverter',
   setup() {
     const inputText = ref('');
-    const fontSize = ref(14);
+    const fontSize = ref(16);
     const selectedFont = ref('regular');
     // const selectedFont = ref('kaiti');
     const textarea = ref(null);
@@ -140,6 +155,28 @@ export default {
       console.log(sentences.filter(sentence => sentence.trim()));
       return sentences.filter(sentence => sentence.trim());
     });
+    // const clearText = () => {
+    //   inputText.value = '';
+      
+    //   if (textarea.value) {
+    //     textarea.value.style.height = 'auto';
+    //   }
+    // };
+    const pasteFromClipboard = async () => {
+      try {
+        const clipboardText = await navigator.clipboard.readText();
+        inputText.value = clipboardText;
+      } catch (error) {
+        console.error('Failed to read clipboard contents: ', error);
+      }
+    };
+    const clearOrPasteText = () => {
+      if (inputText.value.trim()) {
+        inputText.value = '';
+      } else {
+        pasteFromClipboard();
+      }
+    };
 
     const splitIntoLines = text => {
       const parts = text.split('，');
@@ -281,6 +318,8 @@ export default {
     };
 
     return {
+      clearOrPasteText,
+      pasteFromClipboard,
       copyToClipboard,
       showCopySuccess,
       getAllText,
@@ -314,7 +353,20 @@ export default {
   /* src: url('/fonts/kaiti.ttf') format('truetype'); */
 }
 
+.toggle-button {
+  margin-left: 10px;
+  padding: 8px 16px;
+  background-color: #3646f4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
 
+.toggle-button:hover {
+  background-color: #3646f4;
+}
 .relative {
   position: relative;
 }
@@ -462,7 +514,7 @@ export default {
 }
 
 .text-line {
-  display: flex;
+  display: block;
   flex-wrap: wrap;
   /* gap: 0.5rem; */
   /* padding: 0.5rem; */
