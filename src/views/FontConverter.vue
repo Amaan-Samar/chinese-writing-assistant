@@ -111,7 +111,7 @@ export default {
   name: 'FontConverter',
   setup() {
     const inputText = ref('');
-    const fontSize = ref(12);
+    const fontSize = ref(14);
     const selectedFont = ref('regular');
     // const selectedFont = ref('kaiti');
     const textarea = ref(null);
