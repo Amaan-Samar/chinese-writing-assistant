@@ -8,6 +8,9 @@
             <option value="kaiti">Kaiti</option>
             <option value="tegakizatsu">Tegakizatsu</option>
             <option value="regular">Regular</option>
+            <option value="cwTeXMing_Medium">cwTeXMing_Medium</option>
+            <option value="Han_Sans_CN_Light">Han_Sans_CN_Light</option>
+            <option value="GenJyuuGothic">GenJyuuGothic</option>
           </select>
         </div>
         <div class="size-selector">
@@ -47,19 +50,7 @@
                 <component :is="copiedStates[`block-${sentenceId}`] ? 'CopiedIcon' : 'CopyIcon'" />
               </button> -->
               
-              <!-- Display sentence-level pinyin -->
-              <div class="line-container">
-                <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
-                  <div class="line-characters" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
-                    {{ line.text }}
-                  </div>
-
-                  <div class="line-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize * 0.8}px` }">
-                    {{ line.pinyin }}
-                  </div>
-                </div>
-              </div>
-
+              <!-- 1 -->
               <!-- <div class="line-container">
                 <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
                   <button @click="copyToClipboard(line.text, `line-${sentenceId}-${lineIndex}`)" class="copy-btn line-copy-btn" title="Copy line">
@@ -96,13 +87,46 @@
 
                 </div>
               </div> -->
+              
+              <!-- 2 -->
+              <!-- Display sentence-level pinyin -->
+              <!-- <div class="line-container">
+                <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
+                  <div class="line-characters" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
+                    {{ line.text }}
+                  </div>
+
+                  <div class="line-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize * 0.8}px` }">
+                    {{ line.pinyin }}
+                  </div>
+                </div>
+              </div> -->
+
+              <!-- 3 -->
+              <div class="line-container">
+                <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
+                  <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
+                    <span v-for="(pair, pairIndex) in line.textAndPinyin" :key="pairIndex">
+                      <span class="character" :style="{ fontFamily: getCharacterFontFamily }">{{ pair[0] }}</span>
+                      <span class="pinyin" :style="{ fontFamily: getPinyinFontFamily, fontSize: `${fontSize * 0.8}px` }">{{ pair[1] }}</span>
+                    </span>
+                  </div>
+                </div>
+                
+                <!-- Add this spacer div at the end -->
+              </div>
             </div>
+            <div 
+              class="scroll-spacer"
+              :style="{
+                minHeight: `calc(66vh - ${fontSize * 2}px)`  // Adjust based on your font size
+              }"
+            ></div>
 
           </template>
           
           <div v-else class="placeholder-text">
             Enter text to see the comparison
-            <!-- <div class="sentence-pinyin">{{ block.sentencePinyin }}</div>  -->
           </div>
 
         </div>
@@ -127,7 +151,7 @@ export default {
   setup() {
     const inputText = ref('');
     const fontSize = ref(16);
-    const selectedFont = ref('regular');
+    const selectedFont = ref('Han_Sans_CN_Light');
     // const selectedFont = ref('kaiti');
     const textarea = ref(null);
 
@@ -135,9 +159,12 @@ export default {
     const COPIED_ICON_DURATION = 3000;
 
     const fonts = {
-      kaiti: "'Kaiti', '楷体', serif",
+      kaiti: "'Kaiti', serif",
       tegakizatsu: "'tegakizatsu', serif",
-      regular: "'SimSun', '宋体', serif",
+      regular: "'SimSun', serif",
+      cwTeXMing_Medium: "'cwTeXMing_Medium', serif",
+      Han_Sans_CN_Light: "'Han_Sans_CN_Light', serif",
+      GenJyuuGothic: "'GenJyuuGothic', serif",
     };
 
     const getFontFamily = computed(() => fonts[selectedFont.value]);
@@ -155,13 +182,7 @@ export default {
       console.log(sentences.filter(sentence => sentence.trim()));
       return sentences.filter(sentence => sentence.trim());
     });
-    // const clearText = () => {
-    //   inputText.value = '';
-      
-    //   if (textarea.value) {
-    //     textarea.value.style.height = 'auto';
-    //   }
-    // };
+ 
     const pasteFromClipboard = async () => {
       try {
         const clipboardText = await navigator.clipboard.readText();
@@ -170,10 +191,19 @@ export default {
         console.error('Failed to read clipboard contents: ', error);
       }
     };
+
+
     const clearOrPasteText = () => {
       if (inputText.value.trim()) {
+        // If there's text, clear it
         inputText.value = '';
+        
+        // Reset the textarea height
+        if (textarea.value) {
+          textarea.value.style.height = 'auto';
+        }
       } else {
+        // If empty, paste from clipboard
         pasteFromClipboard();
       }
     };
@@ -206,19 +236,18 @@ export default {
       
       sentences.filter(sentence => sentence.trim()).forEach((sentence, index) => {
         const sentenceId = index;
-        // result[sentenceId] = {};
         result[sentenceId] = {
           lines: {},
           sentencePinyin: getPinyinForSentence(sentence)
         };
         
-        const lines = splitIntoLines(sentence);
-        
+        const lines = splitIntoLines(sentence);     
         lines.forEach((line, lineIndex) => {
           const lineId = lineIndex;
           result[sentenceId].lines[lineId] = {
             text: line,
-            pinyin: getPinyinForSentence(line)
+            pinyin: getPinyinForSentence(line),
+            textAndPinyin: getPinyinAndChar(line)
           };
         });
       });
@@ -250,6 +279,23 @@ export default {
         .replace(/\s+/g, ' ')
         .trim();
     };
+
+    const getPinyinAndChar = sentence => {
+      if (!sentence) return [];
+
+      return sentence
+        .split('')
+        .map(char => [char, getPinyinForChar(char)])
+        .map(([char, pinyin]) => {
+          // If the character is not a Chinese character, return an empty string for pinyin
+          if (!pinyin || /[\d\s.,!?;:"'(){}[\]<>\/\\|~`!@#$%^&*_=+\-]/.test(char) || /[\u2000-\u2BFF\u3000-\u303F\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F1E0-\u1F1FF\u2600-\u26FF\u2700-\u27BF\u1F900-\u1F9FF]/u.test(char)) {
+            return [char, ''];
+          }
+          return [char, pinyin];
+        })
+        .filter(([char]) => char); // Keep only non-empty characters
+    };
+
 
     const adjustHeight = () => {
       if (textarea.value) {
@@ -348,15 +394,27 @@ export default {
 }
 @font-face {
   font-family: 'kaiti';
-  /* font-family: 'kaiti'; */
   src: url('/fonts/kaiti.ttf') format('truetype');
-  /* src: url('/fonts/kaiti.ttf') format('truetype'); */
+}
+
+
+@font-face {
+  font-family: 'cwTeXMing_Medium';
+  src: url('/fonts/cwTeXMing_Medium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'GenJyuuGothic';
+  src: url('/fonts/GenJyuuGothic.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Han_Sans_CN_Light';
+  src: url('/fonts/Han_Sans_CN_Light.otf') format('truetype');
 }
 
 .toggle-button {
   margin-left: 10px;
   padding: 8px 16px;
-  background-color: #3646f4;
+  background-color: #7a91ff;
   color: white;
   border: none;
   border-radius: 4px;
@@ -365,7 +423,7 @@ export default {
 }
 
 .toggle-button:hover {
-  background-color: #3646f4;
+  background-color: #545bc0;
 }
 .relative {
   position: relative;

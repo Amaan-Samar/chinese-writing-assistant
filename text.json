@@ -1,0 +1,53 @@
+Comparison Data: {
+    "0": {
+      "lines": {
+        "0": {
+          "text": "北京时间3月21日凌晨，",
+          "pinyin": "běi jīng shí jiān 3 yuè 2 1 rì líng chén"
+        },
+        "1": {
+          "text": "18强赛第7轮 #国足vs沙特# 如期打响。",
+          "pinyin": "1 8 qiáng sài dì 7 lún # guó zú v s shā tè # rú qī dǎ xiǎng"
+        }
+      },
+      "sentencePinyin": "běi jīng shí jiān 3 yuè 2 1 rì líng chén 1 8 qiáng sài dì 7 lún # guó zú v s shā tè # rú qī dǎ xiǎng"
+    },
+    "1": {
+      "lines": {
+        "0": {
+          "text": "蒋光太伤退，",
+          "pinyin": "jiǎng guāng tài shāng tuì"
+        },
+        "1": {
+          "text": "林良铭直红，",
+          "pinyin": "lín liáng míng zhí hóng"
+        },
+        "2": {
+          "text": "沙特下半场破荒，",
+          "pinyin": "shā tè xià bàn chǎng pò huāng"
+        },
+        "3": {
+          "text": "国足客场0比1小负沙特，",
+          "pinyin": "guó zú kè chǎng 0 bǐ 1 xiǎo fù shā tè"
+        },
+        "4": {
+          "text": "遭遇对手主客场双杀。",
+          "pinyin": "zāo yù duì shǒu zhǔ kè chǎng shuāng shā"
+        }
+      },
+      "sentencePinyin": "jiǎng guāng tài shāng tuì lín liáng míng zhí hóng shā tè xià bàn chǎng pò huāng guó zú kè chǎng 0 bǐ 1 xiǎo fù shā tè zāo yù duì shǒu zhǔ kè chǎng shuāng shā"
+    },
+    "2": {
+      "lines": {
+        "0": {
+          "text": "对国足本场的表现，",
+          "pinyin": "duì guó zú běn chǎng de biǎo xiàn"
+        },
+        "1": {
+          "text": "大伙满意么？",
+          "pinyin": "dà huǒ mǎn yì me"
+        }
+      },
+      "sentencePinyin": "duì guó zú běn chǎng de biǎo xiàn dà huǒ mǎn yì me"
+    }
+  }
