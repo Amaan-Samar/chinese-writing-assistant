@@ -107,7 +107,7 @@
                 <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
                   <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
                     <span v-for="(pair, pairIndex) in line.textAndPinyin" :key="pairIndex">
-                      <span class="character" :style="{ fontFamily: getCharacterFontFamily }">{{ pair[0] }}</span>
+                      <span class="character" :style="{ fontFamily: getCharacterFontFamily, fontWeight: '700' }">{{ pair[0] }}</span>
                       <span class="pinyin" :style="{ fontFamily: getPinyinFontFamily, fontSize: `${fontSize * 0.8}px` }">{{ pair[1] }}</span>
                     </span>
                   </div>
@@ -150,7 +150,7 @@ export default {
   name: 'FontConverter',
   setup() {
     const inputText = ref('');
-    const fontSize = ref(16);
+    const fontSize = ref(20 );
     const selectedFont = ref('Han_Sans_CN_Light');
     // const selectedFont = ref('kaiti');
     const textarea = ref(null);
