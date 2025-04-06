@@ -107,14 +107,32 @@
                 <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
                   <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
                     <span v-for="(pair, pairIndex) in line.textAndPinyin" :key="pairIndex">
-                      <span class="character" :style="{ fontFamily: getCharacterFontFamily, fontWeight: '700' }">{{ pair[0] }}</span>
-                      <span class="pinyin" :style="{ fontFamily: getPinyinFontFamily, fontSize: `${fontSize * 0.8}px` }">{{ pair[1] }}</span>
+                      <span class="character" :style="{fontWeight: '700' }">{{ pair[0] }}</span>
+                      <!-- <span class="pinyin" :style="{ fontFamily: getPinyinFontFamily, fontSize: `${fontSize * 0.8}px` }">{{ pair[1] }}</span> -->
+                      <span class="pinyin" :style="{fontSize: `${fontSize * 0.8}px`, display: showPinyin ? 'inline' : 'none' }">{{ pair[1] }}</span>
                     </span>
                   </div>
                 </div>
-                
-                <!-- Add this spacer div at the end -->
               </div>
+
+              <!-- <button
+                  class="toggle-pinyin-btn" :class="{ 'mobile': isMobile }" 
+                  @click="togglePinyin" @mousedown="startDrag" @touchstart="startDrag" ref="floatingBtn"
+                >{{ showPinyin ? 'Hide' : 'Show' }} Pinyin
+              </button> -->
+              <button
+                class="toggle-pinyin-btn"
+                :class="{ 'mobile': isMobile }"
+                @click="togglePinyin"
+                @mousedown="startDrag"
+                @touchstart="startDrag"
+                :style="buttonStyle"
+                ref="floatingBtn"
+              >
+                {{ showPinyin ? 'Hide' : 'Show' }} Pinyin
+              </button>
+
+
             </div>
             <div 
               class="scroll-spacer"
@@ -138,8 +156,10 @@
 import CopyIcon from './icons/CopyIcon.vue';
 import CopiedIcon from './icons/CopiedIcon.vue';
 import ChineseTextToSpeech from './ChineseTextToSpeech.vue'; 
-import { ref, computed, watch, reactive } from 'vue';
+import { ref, computed, watch, reactive, onMounted, onBeforeUnmount} from 'vue';
 import { pinyin } from 'pinyin-pro';
+
+
 
 export default {
   components: {
@@ -154,9 +174,119 @@ export default {
     const selectedFont = ref('Han_Sans_CN_Light');
     // const selectedFont = ref('kaiti');
     const textarea = ref(null);
-
     const copiedStates = reactive({});
     const COPIED_ICON_DURATION = 3000;
+
+    // Add new variables for floating button
+    const showPinyin = ref(true);
+    const isDragging = ref(false);
+    const startX = ref(0);
+    const startY = ref(0);
+    const translateX = ref(0);
+    const translateY = ref(0);
+    const isMobile = ref(false);
+    const floatingBtn = ref(null);
+
+        // Add new methods for floating button
+    const togglePinyin = () => {
+      showPinyin.value = !showPinyin.value;
+    };
+
+    const checkScreenSize = () => {
+      isMobile.value = window.innerWidth <= 768;
+      // Reset position when screen size changes
+      translateX.value = 0;
+      translateY.value = 0;
+    };
+
+    const startDrag = (e) => {
+      if (e.type === 'click') return;
+      isDragging.value = true;
+      const event = e.touches ? e.touches[0] : e;
+      startX.value = event.clientX - translateX.value;
+      startY.value = event.clientY - translateY.value;
+
+      if (e.preventDefault){
+        e.preventDefault();
+      }
+    };
+
+
+    const handleDrag = (e) => {
+      if (!isDragging.value) return;
+
+      const event = e.touches ? e.touches[0] : e;
+
+      translateX.value = event.clientX - startX.value;
+      translateY.value = event.clientY - startY.value;
+
+      //only call preventDefault if it exists
+      if (e.preventDefault){
+        e.preventDefault();
+      }
+    };
+
+    // const handleDrag = (e) => {
+    //   if (!isDragging.value) {
+    //     const event = e.touches ? e.touches[0] : e;
+
+    //     const dx = event.clientX - startX.value;
+    //     const dy = event.clientY - startY.value;
+
+    //     if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+    //       isDragging.value = true;
+    //     }
+    //   }
+
+    //   if (isDragging.value){
+    //     const event = e.touches ? e.touches[0] : e;
+    //     translateX.value = event.clientX - startX.value;
+    //     translateY.value = event.clientY - startY.value;
+    //   }
+
+    //   if (e.preventDefault){
+    //     e.preventDefault();
+    //   }
+    // }
+    const stopDrag = () => {
+      isDragging.value = false;
+    };
+
+    // initalize and clean up event listners
+    // const initDragEvens = () =>{
+    //   checkScreenSize();
+    //   window.addEventListener('resize',checkScreenSize);
+    //   window.addEventListener('mousemove',handleDrag);
+    //   window.addEventListener('touchmove',handleDrag, {passive: false});
+    //   window.addEventListener('mouseup',stopDrag);
+    //   window.addEventListener('touchend',stopDrag);
+
+    // }
+    const buttonStyle = computed(() => {
+      return {
+        transform: `translate(${translateX.value}px, ${translateY.value}px)`
+      };
+    });
+
+    onMounted(() => {
+      checkScreenSize();
+      window.addEventListener('resize', checkScreenSize);
+      window.addEventListener('mousemove', handleDrag);
+      window.addEventListener('touchmove', handleDrag, { passive: false });
+      window.addEventListener('mouseup', stopDrag);
+      window.addEventListener('touchend', stopDrag);
+    });
+
+    onBeforeUnmount(() => {
+      // Clean up event listeners
+      window.removeEventListener('resize', checkScreenSize);
+      window.removeEventListener('mousemove', handleDrag);
+      window.removeEventListener('touchmove', handleDrag);
+      window.removeEventListener('mouseup', stopDrag);
+      window.removeEventListener('touchend', stopDrag);
+    });
+    // initDragEvens();
+    // checkScreenSize();
 
     const fonts = {
       kaiti: "'Kaiti', serif",
@@ -281,21 +411,20 @@ export default {
     };
 
     const getPinyinAndChar = sentence => {
-      if (!sentence) return [];
-
+      if (!sentence || !showPinyin.value) return sentence.split('').map(char => [char, '']);
+      
       return sentence
         .split('')
         .map(char => [char, getPinyinForChar(char)])
         .map(([char, pinyin]) => {
-          // If the character is not a Chinese character, return an empty string for pinyin
-          if (!pinyin || /[\d\s.,!?;:"'(){}[\]<>\/\\|~`!@#$%^&*_=+\-]/.test(char) || /[\u2000-\u2BFF\u3000-\u303F\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F1E0-\u1F1FF\u2600-\u26FF\u2700-\u27BF\u1F900-\u1F9FF]/u.test(char)) {
+          if (!pinyin || /[\d\s.,!?;:"'(){}[\]<>\/\\|~`!@#$%^&*_=+\-]/.test(char) || 
+              /[\u2000-\u2BFF\u3000-\u303F\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F1E0-\u1F1FF\u2600-\u26FF\u2700-\u27BF\u1F900-\u1F9FF]/u.test(char)) {
             return [char, ''];
           }
           return [char, pinyin];
         })
-        .filter(([char]) => char); // Keep only non-empty characters
+        .filter(([char]) => char);
     };
-
 
     const adjustHeight = () => {
       if (textarea.value) {
@@ -356,9 +485,6 @@ export default {
       return allText.trim();
     };
     
-    // const getBlockText = (lines) => {
-    //   return lines.join('\n');
-    // };
     const getBlockText = (lines) => {
       return Object.values(lines).map(line => line.text).join('，');
     };
@@ -383,6 +509,13 @@ export default {
       adjustHeight,
       textarea,
       copiedStates,
+
+      showPinyin,
+      togglePinyin,
+      isMobile,
+      floatingBtn,
+      startDrag,
+      buttonStyle,
     };
   },
 };
@@ -409,6 +542,44 @@ export default {
 @font-face {
   font-family: 'Han_Sans_CN_Light';
   src: url('/fonts/Han_Sans_CN_Light.otf') format('truetype');
+}
+
+.toggle-pinyin-btn {
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #c2fbd7;
+  color: green;
+  border: none;
+  cursor: pointer;
+  box-shadow: #2cbb6333 0 -25px 18px -14px inset,#2cbb6326 0 1px 2px,#2cbb6326 0 2px 4px,#2cbb6326 0 4px 8px,#2cbb6326 0 8px 16px,#2cbb6326 0 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 5px;
+  font-size: 12px;
+  z-index: 1000;
+  user-select: none;
+  touch-action: none;
+  transition: transform 0.1s ease;  
+  top: 20px;
+  left: 20px;
+}
+.toggle-pinyin-btn:hover {
+  box-shadow: #2cbb6359 0 -25px 18px -14px inset,#2cbb6340 0 1px 2px,#2cbb6340 0 2px 4px,#2cbb6340 0 4px 8px,#2cbb6340 0 8px 16px,#2cbb6340 0 16px 32px;
+  transform: scale(1.05) rotate(-1deg);
+}
+.toggle-pinyin-btn.mobile {
+  /* Mobile position */
+  top: auto;
+  left: auto;
+  bottom: 20px;
+  right: 20px;
+}
+.toggle-pinyin-btn:active {
+  transform: scale(0.95) translate(var(--tx, 0), var(--ty, 0));
 }
 
 .toggle-button {
@@ -661,6 +832,13 @@ export default {
   .controls-container {
     flex-direction: row;
     align-items: flex-start;
+  }
+
+  .toggle-pinyin-btn:not(.mobile) {
+    top: auto;
+    left: auto;
+    bottom: 20px;
+    right: 20px;
   }
 
   .text-input{
