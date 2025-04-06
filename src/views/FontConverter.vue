@@ -402,29 +402,73 @@ export default {
     const getPinyinForSentence = sentence => {
       if (!sentence) return '';
       
-      return sentence
-        .split('')
-        .map(char => getPinyinForChar(char))
-        .join(' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+      return pinyin(sentence);
     };
+    // const getPinyinForSentence = sentence => {
+    //   if (!sentence) return '';
+      
+    //   return sentence
+    //     .split('')
+    //     .map(char => getPinyinForChar(char))
+    //     .join(' ')
+    //     .replace(/\s+/g, ' ')
+    //     .trim();
+    // };
+
+    // const getPinyinAndChar = sentence => {
+    //   if (!sentence || !showPinyin.value) return sentence.split('').map(char => [char, '']);
+    //   return pinyin(sentence);
+    // };
+
+    // 他了解这个问题后，轻松地解决了。不过，如果这次再出错，老板肯定饶不了他。昨天他加班到很晚，累得受不了，但工作总算完成了。
+    // const getPinyinAndChar = sentence => {
+    //   if (!sentence || !showPinyin.value) return sentence.split('').map(char => [char, '']);
+      
+    //   return sentence
+    //     .split('')
+    //     .map(char => [char, getPinyinForChar(char)])
+    //     .map(([char, pinyin]) => {
+    //       if (!pinyin || /[\d\s.,!?;:"'(){}[\]<>\/\\|~`!@#$%^&*_=+\-]/.test(char) || 
+    //           /[\u2000-\u2BFF\u3000-\u303F\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F1E0-\u1F1FF\u2600-\u26FF\u2700-\u27BF\u1F900-\u1F9FF]/u.test(char)) {
+    //         return [char, ''];
+    //       }
+    //       return [char, pinyin];
+    //     })
+    //     .filter(([char]) => char);
+    // };
 
     const getPinyinAndChar = sentence => {
-      if (!sentence || !showPinyin.value) return sentence.split('').map(char => [char, '']);
+    if (!sentence) return [];
+    
+    const chars = sentence.split('');
+    if (!showPinyin.value) return chars.map(char => [char, '']);
+
+    try {
+        // First extract only Chinese characters for pinyin conversion
+        const chineseChars = chars.filter(c => /[\u4e00-\u9fa5]/.test(c)).join('');
+        const pinyinString = pinyin(chineseChars);
+        const pinyinSyllables = pinyinString.split(' ');
+        
+        let pinyinIndex = 0;
+        return chars.map(char => {
+            if (/[\u4e00-\u9fa5]/.test(char) && pinyinIndex < pinyinSyllables.length) {
+                return [char, pinyinSyllables[pinyinIndex++]];
+            }
+            return [char, '']; // No pinyin for non-Chinese characters
+        });
+        
+    } catch (error) {
+        console.error('Error processing pinyin:', error);
+        return chars.map(char => [char, '']);
+    }
+};
+    // const getPinyinAndChar = sentence => {
+    //   if (!sentence || !showPinyin.value) return sentence.split('').map(char => [char, '']);
       
-      return sentence
-        .split('')
-        .map(char => [char, getPinyinForChar(char)])
-        .map(([char, pinyin]) => {
-          if (!pinyin || /[\d\s.,!?;:"'(){}[\]<>\/\\|~`!@#$%^&*_=+\-]/.test(char) || 
-              /[\u2000-\u2BFF\u3000-\u303F\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F1E0-\u1F1FF\u2600-\u26FF\u2700-\u27BF\u1F900-\u1F9FF]/u.test(char)) {
-            return [char, ''];
-          }
-          return [char, pinyin];
-        })
-        .filter(([char]) => char);
-    };
+    //   return sentence
+    //     .split('')
+    //     .map(char => [char, getPinyinForChar(char)])
+    // };
 
     const adjustHeight = () => {
       if (textarea.value) {
