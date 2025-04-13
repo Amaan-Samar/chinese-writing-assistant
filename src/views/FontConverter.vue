@@ -29,7 +29,6 @@
       <div class="input-display-row">
         <div class="text-section" :style="{fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
           <textarea v-model="inputText" placeholder="Enter Chinese text here..." class="text-input w-full resize-none" @input="adjustHeight" ref="textarea"></textarea>
-          <!-- <button @click="clearText" class="clear-button">Clear</button> -->
           <button @click="clearOrPasteText" class="toggle-button">
             {{ inputText.trim() ? 'Clear' : 'Paste' }}
           </button>
@@ -108,29 +107,32 @@
                   <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
                     <span v-for="(pair, pairIndex) in line.textAndPinyin" :key="pairIndex">
                       <span class="character" :style="{fontWeight: '700' }">{{ pair[0] }}</span>
-                      <!-- <span class="pinyin" :style="{ fontFamily: getPinyinFontFamily, fontSize: `${fontSize * 0.8}px` }">{{ pair[1] }}</span> -->
                       <span class="pinyin" :style="{fontSize: `${fontSize * 0.8}px`, display: showPinyin ? 'inline' : 'none' }">{{ pair[1] }}</span>
                     </span>
                   </div>
                 </div>
               </div>
 
-              <!-- <button
-                  class="toggle-pinyin-btn" :class="{ 'mobile': isMobile }" 
-                  @click="togglePinyin" @mousedown="startDrag" @touchstart="startDrag" ref="floatingBtn"
-                >{{ showPinyin ? 'Hide' : 'Show' }} Pinyin
-              </button> -->
-              <button
-                class="toggle-pinyin-btn"
-                :class="{ 'mobile': isMobile }"
-                @click="togglePinyin"
-                @mousedown="startDrag"
-                @touchstart="startDrag"
-                :style="buttonStyle"
-                ref="floatingBtn"
-              >
-                {{ showPinyin ? 'Hide' : 'Show' }} Pinyin
-              </button>
+              <div class="floating-controls" :class="{ 'mobile': isMobile}">
+                <!-- <button
+                  class="clear-text-btn"
+                  :class="{ 'mobile': isMobile }"
+                  @click="clearText"
+                >
+                  Clear
+                </button> -->
+                <button
+                  class="toggle-pinyin-btn"
+                  :class="{ 'mobile': isMobile }"
+                  @click="togglePinyin"
+                  :style="buttonStyle"
+                  ref="floatingBtn"
+                  >
+                  {{ showPinyin ? 'Hide' : 'Show' }}
+                </button>
+              </div>
+              <!-- @mousedown="startDrag"
+              @touchstart="startDrag" -->
 
 
             </div>
@@ -144,7 +146,7 @@
           </template>
           
           <div v-else class="placeholder-text">
-            Enter text to see the comparison
+            Enter Chinese text here
           </div>
 
         </div>
@@ -174,6 +176,8 @@ export default {
     const selectedFont = ref('Han_Sans_CN_Light');
     // const selectedFont = ref('kaiti');
     const textarea = ref(null);
+    const dragTimer = ref(null);
+    const DRAG_DELAY = 2000;
     const copiedStates = reactive({});
     const COPIED_ICON_DURATION = 3000;
 
@@ -201,16 +205,36 @@ export default {
 
     const startDrag = (e) => {
       if (e.type === 'click') return;
-      isDragging.value = true;
+      // isDragging.value = true;
       const event = e.touches ? e.touches[0] : e;
       startX.value = event.clientX - translateX.value;
       startY.value = event.clientY - translateY.value;
 
+      if (dragTimer.value) {
+        clearTimeout(dragTimer.value);
+        dragTimer.value = null;
+      }
+
+      if (e.touches) {
+        dragTimer.value = setTimeout(()=> {
+          isDragging.value = true;
+          dragTimer.value = null;
+        }, DRAG_DELAY);
+      } else {
+        isDragging.value = null;
+      }
+      
       if (e.preventDefault){
         e.preventDefault();
       }
     };
 
+    const stopDrag = () => {
+      if (dragTimer.value) {
+        dragTimer.value = null;
+      }
+      isDragging.value = false;
+    };
 
     const handleDrag = (e) => {
       if (!isDragging.value) return;
@@ -226,42 +250,6 @@ export default {
       }
     };
 
-    // const handleDrag = (e) => {
-    //   if (!isDragging.value) {
-    //     const event = e.touches ? e.touches[0] : e;
-
-    //     const dx = event.clientX - startX.value;
-    //     const dy = event.clientY - startY.value;
-
-    //     if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-    //       isDragging.value = true;
-    //     }
-    //   }
-
-    //   if (isDragging.value){
-    //     const event = e.touches ? e.touches[0] : e;
-    //     translateX.value = event.clientX - startX.value;
-    //     translateY.value = event.clientY - startY.value;
-    //   }
-
-    //   if (e.preventDefault){
-    //     e.preventDefault();
-    //   }
-    // }
-    const stopDrag = () => {
-      isDragging.value = false;
-    };
-
-    // initalize and clean up event listners
-    // const initDragEvens = () =>{
-    //   checkScreenSize();
-    //   window.addEventListener('resize',checkScreenSize);
-    //   window.addEventListener('mousemove',handleDrag);
-    //   window.addEventListener('touchmove',handleDrag, {passive: false});
-    //   window.addEventListener('mouseup',stopDrag);
-    //   window.addEventListener('touchend',stopDrag);
-
-    // }
     const buttonStyle = computed(() => {
       return {
         transform: `translate(${translateX.value}px, ${translateY.value}px)`
@@ -278,6 +266,10 @@ export default {
     });
 
     onBeforeUnmount(() => {
+      // Clear the timer when the component is destroyed
+      if (dragTimer.value) {
+        clearTimeout(dragTimer.value);
+      }
       // Clean up event listeners
       window.removeEventListener('resize', checkScreenSize);
       window.removeEventListener('mousemove', handleDrag);
@@ -285,8 +277,6 @@ export default {
       window.removeEventListener('mouseup', stopDrag);
       window.removeEventListener('touchend', stopDrag);
     });
-    // initDragEvens();
-    // checkScreenSize();
 
     const fonts = {
       kaiti: "'Kaiti', serif",
@@ -309,7 +299,6 @@ export default {
       if (remainingText) {
         sentences.push(remainingText[0]);
       }
-      console.log(sentences.filter(sentence => sentence.trim()));
       return sentences.filter(sentence => sentence.trim());
     });
  
@@ -322,6 +311,16 @@ export default {
       }
     };
 
+    const clearText = () => {
+      inputText.value = '';
+
+      if (textarea.value) {
+        setTimeout(() => {
+          textarea.value.style.height = 'auto';
+          textarea.value.style.height = '40px';
+        },0);
+      }
+    };
 
     const clearOrPasteText = () => {
       if (inputText.value.trim()) {
@@ -330,7 +329,10 @@ export default {
         
         // Reset the textarea height
         if (textarea.value) {
-          textarea.value.style.height = 'auto';
+          setTimeout(() => {
+            textarea.value.style.height = 'auto';
+            textarea.value.style.height = '40px';
+          }, 0);
         }
       } else {
         // If empty, paste from clipboard
@@ -404,38 +406,6 @@ export default {
       
       return pinyin(sentence);
     };
-    // const getPinyinForSentence = sentence => {
-    //   if (!sentence) return '';
-      
-    //   return sentence
-    //     .split('')
-    //     .map(char => getPinyinForChar(char))
-    //     .join(' ')
-    //     .replace(/\s+/g, ' ')
-    //     .trim();
-    // };
-
-    // const getPinyinAndChar = sentence => {
-    //   if (!sentence || !showPinyin.value) return sentence.split('').map(char => [char, '']);
-    //   return pinyin(sentence);
-    // };
-
-    // 他了解这个问题后，轻松地解决了。不过，如果这次再出错，老板肯定饶不了他。昨天他加班到很晚，累得受不了，但工作总算完成了。
-    // const getPinyinAndChar = sentence => {
-    //   if (!sentence || !showPinyin.value) return sentence.split('').map(char => [char, '']);
-      
-    //   return sentence
-    //     .split('')
-    //     .map(char => [char, getPinyinForChar(char)])
-    //     .map(([char, pinyin]) => {
-    //       if (!pinyin || /[\d\s.,!?;:"'(){}[\]<>\/\\|~`!@#$%^&*_=+\-]/.test(char) || 
-    //           /[\u2000-\u2BFF\u3000-\u303F\u1F600-\u1F64F\u1F300-\u1F5FF\u1F680-\u1F6FF\u1F1E0-\u1F1FF\u2600-\u26FF\u2700-\u27BF\u1F900-\u1F9FF]/u.test(char)) {
-    //         return [char, ''];
-    //       }
-    //       return [char, pinyin];
-    //     })
-    //     .filter(([char]) => char);
-    // };
 
     const getPinyinAndChar = sentence => {
     if (!sentence) return [];
@@ -462,26 +432,22 @@ export default {
         return chars.map(char => [char, '']);
     }
 };
-    // const getPinyinAndChar = sentence => {
-    //   if (!sentence || !showPinyin.value) return sentence.split('').map(char => [char, '']);
-      
-    //   return sentence
-    //     .split('')
-    //     .map(char => [char, getPinyinForChar(char)])
-    // };
+
 
     const adjustHeight = () => {
       if (textarea.value) {
         textarea.value.style.height = 'auto'; // Reset height to auto
-        textarea.value.style.height = `${textarea.value.scrollHeight}px`;
+
+        // if there's no text, set a default height
+        if (!inputText.value.trim()) {
+          textarea.value.style.height = '40px';
+        }else {
+          textarea.value.style.height = `${textarea.value.scrollHeight}px`;
+        }
       }
     };
 
     watch(inputText, adjustHeight);
-
-    watch(comparisonData, (newValue) => {
-      console.log('Comparison Data:', JSON.stringify(newValue, null, 2));
-    });
 
     const copyToClipboard = (text, buttonId) => {
       navigator.clipboard.writeText(text)
@@ -553,6 +519,7 @@ export default {
       adjustHeight,
       textarea,
       copiedStates,
+      clearText,
 
       showPinyin,
       togglePinyin,
@@ -587,42 +554,85 @@ export default {
   font-family: 'Han_Sans_CN_Light';
   src: url('/fonts/Han_Sans_CN_Light.otf') format('truetype');
 }
-
-.toggle-pinyin-btn {
-  position: fixed;
-  width: 60px;
-  height: 60px;
+.clear-text-btn {
+  width: 40px;
+  height: 40px;
+  background-color: #ffecec;
+  border-color: #ffcbcb;
+  padding: 8px 12px;
   border-radius: 50%;
-  background-color: #c2fbd7;
-  color: green;
-  border: none;
+  border: 1px solid #ccc;
   cursor: pointer;
-  box-shadow: #2cbb6333 0 -25px 18px -14px inset,#2cbb6326 0 1px 2px,#2cbb6326 0 2px 4px,#2cbb6326 0 4px 8px,#2cbb6326 0 8px 16px,#2cbb6326 0 16px 32px;
+  transform: all 0.2s ease;
+}
+
+.clear-text-btn:hover {
+  background-color: #f0f0f0;
+}
+.floating-controls{
+  position: fixed;
+  width: 70px;
+  height: auto;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
   padding: 5px;
-  font-size: 12px;
-  z-index: 1000;
-  user-select: none;
-  touch-action: none;
-  transition: transform 0.1s ease;  
   top: 20px;
-  left: 20px;
+  right: 20px;
 }
-.toggle-pinyin-btn:hover {
-  box-shadow: #2cbb6359 0 -25px 18px -14px inset,#2cbb6340 0 1px 2px,#2cbb6340 0 2px 4px,#2cbb6340 0 4px 8px,#2cbb6340 0 8px 16px,#2cbb6340 0 16px 32px;
-  transform: scale(1.05) rotate(-1deg);
-}
-.toggle-pinyin-btn.mobile {
+.floating-controls.mobile {
   /* Mobile position */
   top: auto;
   left: auto;
   bottom: 20px;
   right: 20px;
 }
+.floating-controls:active {
+  transform: scale(0.95) translate(var(--tx, 0), var(--ty, 0));
+}
+.toggle-pinyin-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #7a91ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  /* box-shadow: #2cbb6333 0 -25px 18px -14px inset,#2cbb6326 0 1px 2px,#2cbb6326 0 2px 4px,#2cbb6326 0 4px 8px,#2cbb6326 0 8px 16px,#2cbb6326 0 16px 32px; */
+  box-shadow: #5960c533 0 -25px 18px -14px inset, #5960c526 0 1px 2px, #5960c526 0 2px 4px, 
+  #5960c526 0 4px 8px, #5960c526 0 8px 16px, #5960c526 0 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 5px;
+  font-size: 12px;  box-shadow: #4a51b359 0 -25px 18px -14px inset, #4a51b340 0 1px 2px, #4a51b340 0 2px 4px,
+  #4a51b340 0 4px 8px, #4a51b340 0 8px 16px, #4a51b340 0 16px 32px;
+  z-index: 1000;
+  user-select: none;
+  touch-action: none;
+  transition: transform 0.1s ease;  
+  /* top: 20px;
+  right: 20px; */
+}
+
+.toggle-pinyin-btn:hover {
+  background-color: #545bc0;
+  box-shadow: #4a51b359 0 -25px 18px -14px inset, #4a51b340 0 1px 2px, #4a51b340 0 2px 4px,
+  #4a51b340 0 4px 8px, #4a51b340 0 8px 16px, #4a51b340 0 16px 32px;
+  /* box-shadow: #2cbb6359 0 -25px 18px -14px inset,#2cbb6340 0 1px 2px,#2cbb6340 0 2px 4px,#2cbb6340 0 4px 8px,#2cbb6340 0 8px 16px,#2cbb6340 0 16px 32px; */
+  transform: scale(1.05) rotate(-1deg);
+}
+/* .toggle-pinyin-btn.mobile {
+  top: auto;
+  left: auto;
+  bottom: 20px;
+  right: 20px;
+} */
 .toggle-pinyin-btn:active {
+  background-color: #4a51b3;
   transform: scale(0.95) translate(var(--tx, 0), var(--ty, 0));
 }
 
@@ -769,28 +779,16 @@ export default {
 .comparison-display {
   max-width: 1200px;
   margin: 0 auto; 
-  /* padding: 1rem; */
-  /* border: 1px solid #ddd; */
-  /* border-radius: 4px; */
 }
-
-/* .comparison-block {
-  margin-bottom: 2rem;
-  padding: 1rem;
-  border: 1px solid #eee;
-} */
 
 .line-container {
   display: flex;
   flex-direction: column;
-  /* gap: 0.5rem; */
 }
 
 .text-line {
   display: block;
   flex-wrap: wrap;
-  /* gap: 0.5rem; */
-  /* padding: 0.5rem; */
   background-color: white;
   border-radius: 0.25rem;
 }
@@ -798,7 +796,6 @@ export default {
 .character-container {
   display: flex;
   flex-wrap: wrap;
-  /* gap: 0.75rem; */
   align-items: flex-start;
 }
 
