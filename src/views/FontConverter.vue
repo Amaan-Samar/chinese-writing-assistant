@@ -114,16 +114,17 @@
               </div>
 
               <div class="floating-controls" :class="{ 'mobile': isMobile}">
-                <!-- <button
+                <button
                   class="clear-text-btn"
                   :class="{ 'mobile': isMobile }"
                   @click="clearText"
                 >
                   Clear
-                </button> -->
+                </button>
                 <button
                   class="toggle-pinyin-btn"
                   :class="{ 'mobile': isMobile }"
+                  role="button"
                   @click="togglePinyin"
                   :style="buttonStyle"
                   ref="floatingBtn"
@@ -174,6 +175,7 @@ export default {
     const inputText = ref('');
     const fontSize = ref(20 );
     const selectedFont = ref('Han_Sans_CN_Light');
+    const font_weight = '700';
     // const selectedFont = ref('kaiti');
     const textarea = ref(null);
     const dragTimer = ref(null);
@@ -532,7 +534,7 @@ export default {
 };
 </script>
 <style scoped>
-@font-face {
+/* @font-face {
   font-family: 'tegakizatsu';
   src: url('/fonts/tegakizatsu.ttf') format('truetype');
 }
@@ -549,14 +551,17 @@ export default {
 @font-face {
   font-family: 'GenJyuuGothic';
   src: url('/fonts/GenJyuuGothic.ttf') format('truetype');
-}
+} */
 @font-face {
   font-family: 'Han_Sans_CN_Light';
   src: url('/fonts/Han_Sans_CN_Light.otf') format('truetype');
 }
-.clear-text-btn {
+/* .clear-text-btn {
+  font-size: 12px;
   width: 40px;
   height: 40px;
+  text-align: center;
+  text-decoration: none;
   background-color: #ffecec;
   border-color: #ffcbcb;
   padding: 8px 12px;
@@ -568,21 +573,23 @@ export default {
 
 .clear-text-btn:hover {
   background-color: #f0f0f0;
-}
+} */
 .floating-controls{
   position: fixed;
-  width: 70px;
+  width: 80px;
   height: auto;
   border-radius: 5px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 5px;
-  top: 20px;
-  right: 20px;
+  position: fixed;
+  top: 50%;
+  right: 16.66vw;
+  z-index: 1000;
 }
 .floating-controls.mobile {
-  /* Mobile position */
   top: auto;
   left: auto;
   bottom: 20px;
@@ -591,49 +598,33 @@ export default {
 .floating-controls:active {
   transform: scale(0.95) translate(var(--tx, 0), var(--ty, 0));
 }
-.toggle-pinyin-btn {
-  position: relative;
+
+
+
+
+.toggle-pinyin-btn,
+.clear-text-btn {
+  background-color: #7a91ff;
+  border-radius: 50%;
+  box-shadow: #5E5DF0 0 10px 20px -10px;
+  color: white;
+  cursor: pointer;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  background-color: #7a91ff;
-  color: white;
-  border: none;
-  cursor: pointer;
-  /* box-shadow: #2cbb6333 0 -25px 18px -14px inset,#2cbb6326 0 1px 2px,#2cbb6326 0 2px 4px,#2cbb6326 0 4px 8px,#2cbb6326 0 8px 16px,#2cbb6326 0 16px 32px; */
-  box-shadow: #5960c533 0 -25px 18px -14px inset, #5960c526 0 1px 2px, #5960c526 0 2px 4px, 
-  #5960c526 0 4px 8px, #5960c526 0 8px 16px, #5960c526 0 16px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+  display: inline-block;
+  opacity: 1;
+  outline: 0 solid transparent;
   padding: 5px;
-  font-size: 12px;  box-shadow: #4a51b359 0 -25px 18px -14px inset, #4a51b340 0 1px 2px, #4a51b340 0 2px 4px,
-  #4a51b340 0 4px 8px, #4a51b340 0 8px 16px, #4a51b340 0 16px 32px;
-  z-index: 1000;
+  margin: 5px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 250ms;
+  border: 0;
+  font-size: 12px;  
   user-select: none;
-  touch-action: none;
-  transition: transform 0.1s ease;  
-  /* top: 20px;
-  right: 20px; */
-}
-
-.toggle-pinyin-btn:hover {
-  background-color: #545bc0;
-  box-shadow: #4a51b359 0 -25px 18px -14px inset, #4a51b340 0 1px 2px, #4a51b340 0 2px 4px,
-  #4a51b340 0 4px 8px, #4a51b340 0 8px 16px, #4a51b340 0 16px 32px;
-  /* box-shadow: #2cbb6359 0 -25px 18px -14px inset,#2cbb6340 0 1px 2px,#2cbb6340 0 2px 4px,#2cbb6340 0 4px 8px,#2cbb6340 0 8px 16px,#2cbb6340 0 16px 32px; */
-  transform: scale(1.05) rotate(-1deg);
-}
-/* .toggle-pinyin-btn.mobile {
-  top: auto;
-  left: auto;
-  bottom: 20px;
-  right: 20px;
-} */
-.toggle-pinyin-btn:active {
-  background-color: #4a51b3;
-  transform: scale(0.95) translate(var(--tx, 0), var(--ty, 0));
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
 .toggle-button {
