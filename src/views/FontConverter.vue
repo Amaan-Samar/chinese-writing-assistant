@@ -34,8 +34,15 @@
           </button>
         </div>
       </div>
-      <!-- <ChineseTextToSpeech style="max-width: 1200px;" :text="inputText" /> -->
 
+      <FloatingControls 
+        v-if="inputText.trim()"
+        :showPinyin="showPinyin"
+        @clear="clearText"
+        @toggle-pinyin="togglePinyin"
+      />
+      <!-- <ChineseTextToSpeech style="max-width: 1200px;" :text="inputText" /> -->
+  
       <div v-if="inputText.trim()" class="comparison-section">
         <div class="comparison-display relative">
             <!-- <button @click="copyToClipboard(getAllText(), 'parent')" class="copy-btn parent-copy-btn" title="Copy all text">
@@ -113,29 +120,6 @@
                 </div>
               </div>
 
-              <div class="floating-controls" :class="{ 'mobile': isMobile}">
-                <button
-                  class="clear-text-btn"
-                  :class="{ 'mobile': isMobile }"
-                  @click="clearText"
-                >
-                  Clear
-                </button>
-                <button
-                  class="toggle-pinyin-btn"
-                  :class="{ 'mobile': isMobile }"
-                  role="button"
-                  @click="togglePinyin"
-                  :style="buttonStyle"
-                  ref="floatingBtn"
-                  >
-                  {{ showPinyin ? 'Hide' : 'Show' }}
-                </button>
-              </div>
-              <!-- @mousedown="startDrag"
-              @touchstart="startDrag" -->
-
-
             </div>
             <div 
               class="scroll-spacer"
@@ -159,6 +143,7 @@
 import CopyIcon from './icons/CopyIcon.vue';
 import CopiedIcon from './icons/CopiedIcon.vue';
 import ChineseTextToSpeech from './ChineseTextToSpeech.vue'; 
+import FloatingControls from './FloatingControls.vue'; // Import the new component
 import { ref, computed, watch, reactive, onMounted, onBeforeUnmount} from 'vue';
 import { pinyin } from 'pinyin-pro';
 
@@ -168,6 +153,7 @@ export default {
   components: {
     ChineseTextToSpeech,
     CopiedIcon,
+    FloatingControls,
     CopyIcon,
   },
   name: 'FontConverter',
@@ -178,107 +164,31 @@ export default {
     const font_weight = '700';
     // const selectedFont = ref('kaiti');
     const textarea = ref(null);
-    const dragTimer = ref(null);
-    const DRAG_DELAY = 2000;
     const copiedStates = reactive({});
     const COPIED_ICON_DURATION = 3000;
 
     // Add new variables for floating button
     const showPinyin = ref(true);
-    const isDragging = ref(false);
-    const startX = ref(0);
-    const startY = ref(0);
-    const translateX = ref(0);
-    const translateY = ref(0);
-    const isMobile = ref(false);
-    const floatingBtn = ref(null);
 
         // Add new methods for floating button
     const togglePinyin = () => {
       showPinyin.value = !showPinyin.value;
     };
 
-    const checkScreenSize = () => {
-      isMobile.value = window.innerWidth <= 768;
-      // Reset position when screen size changes
-      translateX.value = 0;
-      translateY.value = 0;
-    };
+    // const checkScreenSize = () => {
+    //   isMobile.value = window.innerWidth <= 768;
+    //   // Reset position when screen size changes
+    //   translateX.value = 0;
+    //   translateY.value = 0;
+    // };
 
-    const startDrag = (e) => {
-      if (e.type === 'click') return;
-      // isDragging.value = true;
-      const event = e.touches ? e.touches[0] : e;
-      startX.value = event.clientX - translateX.value;
-      startY.value = event.clientY - translateY.value;
 
-      if (dragTimer.value) {
-        clearTimeout(dragTimer.value);
-        dragTimer.value = null;
-      }
 
-      if (e.touches) {
-        dragTimer.value = setTimeout(()=> {
-          isDragging.value = true;
-          dragTimer.value = null;
-        }, DRAG_DELAY);
-      } else {
-        isDragging.value = null;
-      }
-      
-      if (e.preventDefault){
-        e.preventDefault();
-      }
-    };
-
-    const stopDrag = () => {
-      if (dragTimer.value) {
-        dragTimer.value = null;
-      }
-      isDragging.value = false;
-    };
-
-    const handleDrag = (e) => {
-      if (!isDragging.value) return;
-
-      const event = e.touches ? e.touches[0] : e;
-
-      translateX.value = event.clientX - startX.value;
-      translateY.value = event.clientY - startY.value;
-
-      //only call preventDefault if it exists
-      if (e.preventDefault){
-        e.preventDefault();
-      }
-    };
-
-    const buttonStyle = computed(() => {
-      return {
-        transform: `translate(${translateX.value}px, ${translateY.value}px)`
-      };
-    });
-
-    onMounted(() => {
-      checkScreenSize();
-      window.addEventListener('resize', checkScreenSize);
-      window.addEventListener('mousemove', handleDrag);
-      window.addEventListener('touchmove', handleDrag, { passive: false });
-      window.addEventListener('mouseup', stopDrag);
-      window.addEventListener('touchend', stopDrag);
-    });
-
-    onBeforeUnmount(() => {
-      // Clear the timer when the component is destroyed
-      if (dragTimer.value) {
-        clearTimeout(dragTimer.value);
-      }
-      // Clean up event listeners
-      window.removeEventListener('resize', checkScreenSize);
-      window.removeEventListener('mousemove', handleDrag);
-      window.removeEventListener('touchmove', handleDrag);
-      window.removeEventListener('mouseup', stopDrag);
-      window.removeEventListener('touchend', stopDrag);
-    });
+    // const buttonStyle = computed(() => {
+    //   return {
+    //     transform: `translate(${translateX.value}px, ${translateY.value}px)`
+    //   };
+    // });
 
     const fonts = {
       kaiti: "'Kaiti', serif",
@@ -523,58 +433,23 @@ export default {
       copiedStates,
       clearText,
 
-      showPinyin,
-      togglePinyin,
-      isMobile,
-      floatingBtn,
-      startDrag,
-      buttonStyle,
+      // showPinyin,
+      // togglePinyin,
+      // isMobile,
+      // floatingBtn,
+      // startDrag,
+      // buttonStyle,
     };
   },
 };
 </script>
 <style scoped>
-/* @font-face {
-  font-family: 'tegakizatsu';
-  src: url('/fonts/tegakizatsu.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'kaiti';
-  src: url('/fonts/kaiti.ttf') format('truetype');
-}
-
-
-@font-face {
-  font-family: 'cwTeXMing_Medium';
-  src: url('/fonts/cwTeXMing_Medium.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'GenJyuuGothic';
-  src: url('/fonts/GenJyuuGothic.ttf') format('truetype');
-} */
 @font-face {
   font-family: 'Han_Sans_CN_Light';
   src: url('/fonts/Han_Sans_CN_Light.otf') format('truetype');
 }
-/* .clear-text-btn {
-  font-size: 12px;
-  width: 40px;
-  height: 40px;
-  text-align: center;
-  text-decoration: none;
-  background-color: #ffecec;
-  border-color: #ffcbcb;
-  padding: 8px 12px;
-  border-radius: 50%;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  transform: all 0.2s ease;
-}
 
-.clear-text-btn:hover {
-  background-color: #f0f0f0;
-} */
-.floating-controls{
+/* .floating-controls{
   position: fixed;
   width: 80px;
   height: auto;
@@ -597,7 +472,7 @@ export default {
 }
 .floating-controls:active {
   transform: scale(0.95) translate(var(--tx, 0), var(--ty, 0));
-}
+} */
 
 
 
@@ -606,7 +481,7 @@ export default {
 .clear-text-btn {
   background-color: #7a91ff;
   border-radius: 50%;
-  box-shadow: #5E5DF0 0 10px 20px -10px;
+  /* box-shadow: #5E5DF0 0 10px 20px -10px; */
   color: white;
   cursor: pointer;
   width: 40px;
@@ -631,6 +506,7 @@ export default {
   margin-left: 10px;
   padding: 8px 16px;
   background-color: #7a91ff;
+  font-weight: 800;
   color: white;
   border: none;
   border-radius: 4px;

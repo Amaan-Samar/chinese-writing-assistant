@@ -8,11 +8,11 @@ const router = createRouter({
       name: 'converter',
       component: () => import('../views/FontConverter.vue'),
     },
-    {
-      path: '/about',
-      name: 'about',
-      component: () => import('../views/AboutView.vue'),
-    },
+    // {
+    //   path: '/about',
+    //   name: 'about',
+    //   component: () => import('../views/AboutView.vue'),
+    // },
   ],
 })
 
