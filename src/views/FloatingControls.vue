@@ -86,6 +86,7 @@ export default {
   box-shadow: #5E5DF0 0 10px 20px -10px;
   border-radius: 50%;
   color: white;
+  font-weight: 800;
   cursor: pointer;
   width: 40px;
   height: 40px;
@@ -94,13 +95,13 @@ export default {
   justify-content: center;
   opacity: 1;
   outline: 0 solid transparent;
-  padding: 5px;
-  margin: 5px;
+  padding: 10px;
+  margin: 10px;
   text-align: center;
   text-decoration: none;
   transition: all 250ms;
   border: 0;
-  font-size: 12px;  
+  font-size: 10px;  
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
@@ -113,8 +114,3 @@ export default {
 }
 
 </style>
-
-
-
-
-

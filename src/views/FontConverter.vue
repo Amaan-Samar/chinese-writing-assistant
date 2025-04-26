@@ -29,7 +29,7 @@
       <div class="input-display-row">
         <div class="text-section" :style="{fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
           <textarea v-model="inputText" placeholder="Enter Chinese text here..." class="text-input w-full resize-none" @input="adjustHeight" ref="textarea"></textarea>
-          <button @click="clearOrPasteText" class="toggle-button">
+          <button @click="clearOrPasteText" class="paste-btn">
             {{ inputText.trim() ? 'Clear' : 'Paste' }}
           </button>
         </div>
@@ -433,8 +433,8 @@ export default {
       copiedStates,
       clearText,
 
-      // showPinyin,
-      // togglePinyin,
+      showPinyin,
+      togglePinyin,
       // isMobile,
       // floatingBtn,
       // startDrag,
@@ -444,77 +444,35 @@ export default {
 };
 </script>
 <style scoped>
-@font-face {
-  font-family: 'Han_Sans_CN_Light';
-  src: url('/fonts/Han_Sans_CN_Light.otf') format('truetype');
+.line-characters-and-pinyin{
+ background-color: rgba(240, 255, 255, 0.3);
+ margin: 5px;
+ padding: 5px;
 }
-
-/* .floating-controls{
-  position: fixed;
-  width: 80px;
-  height: auto;
-  border-radius: 5px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  position: fixed;
-  top: 50%;
-  right: 16.66vw;
-  z-index: 1000;
-}
-.floating-controls.mobile {
-  top: auto;
-  left: auto;
-  bottom: 20px;
-  right: 20px;
-}
-.floating-controls:active {
-  transform: scale(0.95) translate(var(--tx, 0), var(--ty, 0));
-} */
-
-
-
-
-.toggle-pinyin-btn,
-.clear-text-btn {
+.paste-btn {  
+  padding: 8px 16px;
+  font-size: 14px;
   background-color: #7a91ff;
-  border-radius: 50%;
-  /* box-shadow: #5E5DF0 0 10px 20px -10px; */
+  font-weight: 800;
+  border-radius: 4px;
+  box-shadow: #5E5DF0 0 10px 20px -10px;
   color: white;
   cursor: pointer;
-  width: 40px;
-  height: 40px;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   opacity: 1;
   outline: 0 solid transparent;
-  padding: 5px;
-  margin: 5px;
   text-align: center;
   text-decoration: none;
   transition: all 250ms;
-  border: 0;
-  font-size: 12px;  
-  user-select: none;
+  border: none;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
 }
 
-.toggle-button {
-  margin-left: 10px;
-  padding: 8px 16px;
-  background-color: #7a91ff;
-  font-weight: 800;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.toggle-button:hover {
+.paste-btn:hover {
   background-color: #545bc0;
 }
 .relative {
@@ -614,6 +572,8 @@ export default {
 }
 
 .input-display-row {
+  margin: 5px;
+  padding: 5px;
   display: block;
   width: 100%;
   max-width: 1200px;
@@ -622,13 +582,19 @@ export default {
 
 .text-section {
   width: 100%;
+  /* margin: 5px; */
+  padding-right: 1.6rem;
 }
 
 .text-input {
-  padding-left: 1.5rem;
+  /* padding-left: 1.5rem; */
+  padding: 10px;
+  margin: 5px;
+  /* padding-right: 5px; */
   border-radius: 4px;
   font-size: 16px;
   outline: none; 
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .text-display {
@@ -640,15 +606,16 @@ export default {
 }
 .comparison-section {
   max-width: 1200px;
-  margin: 0 auto; 
-  padding: 1rem;
+  /* margin: 0 auto;  */
+  padding-right: 1.6rem;
 }
 .comparison-display {
   max-width: 1200px;
-  margin: 0 auto; 
+  /* margin: 0 auto;  */
 }
 
 .line-container {
+  background-color: rgba(255, 255, 255, 0.3);
   display: flex;
   flex-direction: column;
 }
@@ -656,7 +623,7 @@ export default {
 .text-line {
   display: block;
   flex-wrap: wrap;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.3);
   border-radius: 0.25rem;
 }
 
@@ -727,10 +694,6 @@ export default {
     grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
   }
 
-  .text-input{
-    padding-left: 1.5rem;
-  }
-
   .character-column {
     min-width: auto;
   }
@@ -747,10 +710,6 @@ export default {
     left: auto;
     bottom: 20px;
     right: 20px;
-  }
-
-  .text-input{
-    padding-left: 1.5rem;
   }
 
   .text-input,

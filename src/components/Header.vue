@@ -23,10 +23,7 @@ import { RouterLink } from 'vue-router'
 <style scoped>
 .header {
   width: 100%;
-  background-color: white;
-  padding: 1rem 1rem 0 1rem;
   z-index: 12;
-  /* box-shadow: 0 3px 24px rgba(0, 0, 0, 0.08); */
 }
 
 .nav-container {

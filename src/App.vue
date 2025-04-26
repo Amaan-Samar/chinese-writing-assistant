@@ -4,14 +4,12 @@
     <main class="main-content">
       <RouterView />
     </main>
-    <!-- <Footer /> -->
   </div>
 </template>
 
 <script setup>
 import { RouterView } from 'vue-router'
 import Header from './components/Header.vue'
-// import Footer from './components/Footer.vue'
 </script>
 
 <style>
@@ -26,7 +24,6 @@ import Header from './components/Header.vue'
   flex: 1;
   display: flex;
   justify-content: center;
-  /* align-items: center; */
   width: 100%;
 }
 </style>
