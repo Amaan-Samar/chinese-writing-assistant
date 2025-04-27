@@ -144,7 +144,7 @@ import CopyIcon from './icons/CopyIcon.vue';
 import CopiedIcon from './icons/CopiedIcon.vue';
 import ChineseTextToSpeech from './ChineseTextToSpeech.vue'; 
 import FloatingControls from './FloatingControls.vue'; // Import the new component
-import { ref, computed, watch, reactive, onMounted, onBeforeUnmount} from 'vue';
+import { ref, computed, watch, reactive} from 'vue';
 import { pinyin } from 'pinyin-pro';
 
 
@@ -159,36 +159,17 @@ export default {
   name: 'FontConverter',
   setup() {
     const inputText = ref('');
-    const fontSize = ref(20 );
+    const fontSize = ref(15);
     const selectedFont = ref('Han_Sans_CN_Light');
-    const font_weight = '700';
     // const selectedFont = ref('kaiti');
     const textarea = ref(null);
     const copiedStates = reactive({});
     const COPIED_ICON_DURATION = 3000;
-
-    // Add new variables for floating button
     const showPinyin = ref(true);
 
-        // Add new methods for floating button
     const togglePinyin = () => {
       showPinyin.value = !showPinyin.value;
     };
-
-    // const checkScreenSize = () => {
-    //   isMobile.value = window.innerWidth <= 768;
-    //   // Reset position when screen size changes
-    //   translateX.value = 0;
-    //   translateY.value = 0;
-    // };
-
-
-
-    // const buttonStyle = computed(() => {
-    //   return {
-    //     transform: `translate(${translateX.value}px, ${translateY.value}px)`
-    //   };
-    // });
 
     const fonts = {
       kaiti: "'Kaiti', serif",
@@ -435,19 +416,13 @@ export default {
 
       showPinyin,
       togglePinyin,
-      // isMobile,
-      // floatingBtn,
-      // startDrag,
-      // buttonStyle,
     };
   },
 };
 </script>
 <style scoped>
 .line-characters-and-pinyin{
- background-color: rgba(240, 255, 255, 0.3);
- margin: 5px;
- padding: 5px;
+ padding: 5px 10px;
 }
 .paste-btn {  
   padding: 8px 16px;
@@ -583,14 +558,11 @@ export default {
 .text-section {
   width: 100%;
   /* margin: 5px; */
-  padding-right: 1.6rem;
+  padding: 0 0.2rem;
 }
 
 .text-input {
-  /* padding-left: 1.5rem; */
-  padding: 10px;
-  margin: 5px;
-  /* padding-right: 5px; */
+  padding: 0.5rem;
   border-radius: 4px;
   font-size: 16px;
   outline: none; 
@@ -599,19 +571,16 @@ export default {
 
 .text-display {
   min-height: 300px;
-  padding: 1rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   white-space: pre-wrap;
 }
 .comparison-section {
   max-width: 1200px;
-  margin: 0 auto; 
-  padding-right: 1.6rem;
+  padding: 0 0.5rem 0 0.5rem;
 }
 .comparison-display {
   max-width: 1200px;
-  /* margin: 0 auto;  */
 }
 
 .line-container {

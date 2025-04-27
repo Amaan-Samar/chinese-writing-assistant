@@ -110,7 +110,7 @@ export default {
 .clear-icon {
   margin-bottom: 10px;
   width: 40px;
-  height: 40px;
+  height: 70px;
 }
 
 </style>
