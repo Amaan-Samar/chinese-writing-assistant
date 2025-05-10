@@ -62,29 +62,22 @@ export default {
   position: fixed;
   width: 80px;
   height: auto;
-  border-radius: 5px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   padding: 5px;
   position: fixed;
   top: 50%;
+  left: auto;
   right: 16.66vw;
   z-index: 1000;
 }
 
 .floating-controls.mobile {
   top: auto;
-  left: auto;
-  bottom: 20px;
-  right: 20px;
+  bottom: 10px;
+  right: -10px;
 }
-.clear-text-btn{
-  width: 10px;
-  height: 80px;
-  margin-bottom: 10px;
-}
+
 .toggle-pinyin-btn {
   background-color: #7a91ff;
   box-shadow: #5E5DF0 0 10px 20px -10px;

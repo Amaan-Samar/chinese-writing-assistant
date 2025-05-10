@@ -292,7 +292,7 @@ export default {
           };
         });
       });
-      console.log(result);
+      // console.log(result);
       return result;
     });
 
@@ -511,7 +511,6 @@ export default {
   padding: 4px;
 }
 
-/* Optional: Add styles for toast notification */
 .copy-toast {
   position: fixed;
   bottom: 20px;
@@ -535,17 +534,7 @@ export default {
 
 .converter-wrapper {
   width: 100%;
-  /* display: flex; */
-  /* padding-bottom: 10px; */
 }
-
-/* .controls-section {
-  width: 100%;
-  position: sticky;
-  top: 0;
-  background-color: white;
-  z-index: 10;
-} */
 
 .controls-container {
   display: flex;
@@ -557,8 +546,6 @@ export default {
 
 .main-content {
   display: block;
-  /* width: 100%; */
-  /* padding-top: 10px; */
 }
 
 .input-display-row {
@@ -572,7 +559,6 @@ export default {
 
 .text-section {
   width: 100%;
-  /* margin: 5px; */
   padding: 0 0.2rem;
 }
 
@@ -592,14 +578,11 @@ export default {
 }
 
 .comparison-section {
-  max-width: 1200px; /* Same as input section */
-  margin: 0 auto; /* Center the container */
+  max-width: 1200px;
+  margin: 0 auto; 
   padding: 0 0.5rem;
 }
-/* .comparison-section {
-  max-width: 100%;
-  padding: 0 0.5rem 0 0.5rem;
-} */
+
 .comparison-display {
   max-width: 100%;
 }
@@ -699,7 +682,7 @@ export default {
     top: auto;
     left: auto;
     bottom: 20px;
-    right: 20px;
+    right: 10px;
   }
 
   .text-input,
