@@ -5,11 +5,7 @@
       :class="{ 'mobile': isMobile }"
       @click="$emit('clear')"
     >
-      <img 
-        src="/clear.svg" 
-        alt="Clear"
-        class="clear-icon"
-      />
+    <ClearScreen />
     </button>
     <button
       class="toggle-pinyin-btn"
@@ -23,9 +19,13 @@
 </template>
 
 <script>
+import ClearScreen from './icons/ClearScreen.vue';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 export default {
+  components: {
+    ClearScreen,
+  },
   name: 'FloatingControls',
   props: {
     showPinyin: {
@@ -80,7 +80,11 @@ export default {
   bottom: 20px;
   right: 20px;
 }
-
+.clear-text-btn{
+  width: 10px;
+  height: 80px;
+  margin-bottom: 10px;
+}
 .toggle-pinyin-btn {
   background-color: #7a91ff;
   box-shadow: #5E5DF0 0 10px 20px -10px;
@@ -105,12 +109,6 @@ export default {
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-}
-
-.clear-icon {
-  margin-bottom: 10px;
-  width: 40px;
-  height: 70px;
 }
 
 </style>

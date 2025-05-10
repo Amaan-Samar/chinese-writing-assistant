@@ -1,31 +1,10 @@
 <template>
   <div class="converter-wrapper">
-    <!-- <div class="controls-section">
-      <div class="controls-container">
-        <div class="font-selector">
-          <select id="font-select" v-model="selectedFont" class="select-input">
-            <option value="kaiti">Kaiti</option>
-            <option value="kaiti">Kaiti</option>
-            <option value="tegakizatsu">Tegakizatsu</option>
-            <option value="regular">Regular</option>
-            <option value="cwTeXMing_Medium">cwTeXMing_Medium</option>
-            <option value="Han_Sans_CN_Light">Han_Sans_CN_Light</option>
-            <option value="GenJyuuGothic">GenJyuuGothic</option>
-          </select>
-        </div>
-        <div class="size-selector">
-          <select id="size-select" v-model="fontSize" class="select-input">
-            <option value="8">Extra Small</option>
-            <option value="12">Small</option>
-            <option value="24">Medium</option>
-            <option value="36">Large</option>
-            <option value="48">Extra Large</option>
-          </select>
-        </div>
-      </div>
-    </div>  -->
-
     <div class="main-content">
+      <FontControls
+        v-model="fontSize"
+        :defaultFontSize="15"
+      />
       <div class="input-display-row">
         <div class="text-section" :style="{fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
           <textarea v-model="inputText" placeholder="Enter Chinese text here..." class="text-input w-full resize-none" @input="adjustHeight" ref="textarea"></textarea>
@@ -41,6 +20,7 @@
         @clear="clearText"
         @toggle-pinyin="togglePinyin"
       />
+
       <!-- <ChineseTextToSpeech style="max-width: 1200px;" :text="inputText" /> -->
   
       <div v-if="inputText.trim()" class="comparison-section">
@@ -143,9 +123,10 @@
 import CopyIcon from './icons/CopyIcon.vue';
 import CopiedIcon from './icons/CopiedIcon.vue';
 import ChineseTextToSpeech from './ChineseTextToSpeech.vue'; 
-import FloatingControls from './FloatingControls.vue'; // Import the new component
+import FloatingControls from './FloatingControls.vue';
 import { ref, computed, watch, reactive} from 'vue';
 import { pinyin } from 'pinyin-pro';
+import FontControls from './FontControls.vue';
 
 
 
@@ -154,6 +135,7 @@ export default {
     ChineseTextToSpeech,
     CopiedIcon,
     FloatingControls,
+    FontControls,
     CopyIcon,
   },
   name: 'FontConverter',
@@ -234,49 +216,83 @@ export default {
     };
 
     const splitIntoLines = text => {
-      const parts = text.split('，');
-      return parts
-        .map((line, index) => {
-          if (index < parts.length - 1 || text.endsWith('，')) {
-            return line.trim() + '，';
-          } else {
-            return line.trim();
-          }
-        })
-        .filter(line => line);
+      // First split by newlines
+      const newlineParts = text.split(/\r?\n/);
+      
+      // Then split each part by commas
+      return newlineParts.flatMap(part => {
+        const commaParts = part.split('，');
+        return commaParts
+          .map((line, index) => {
+            if (index < commaParts.length - 1 || part.endsWith('，')) {
+              return line.trim() + '，';
+            } else {
+              return line.trim();
+            }
+          })
+          .filter(line => line);
+      });
     };
+
+
 
     const comparisonData = computed(() => {
       if (!inputText.value) return {};
       
-      const sentences =
-        inputText.value.match(/[^。.!?！？]+[。.!?！？]+/g) || [];
-      const remainingText = inputText.value.match(/[^。.!?！？]+$/);
+      // First extract URLs so they don't get split by punctuation
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const textWithPlaceholders = inputText.value.replace(urlRegex, (url) => {
+        return ` URL_PLACEHOLDER_${url.length} `; // Replace URL with a unique placeholder
+      });
       
-      if (remainingText) {
-        sentences.push(remainingText[0]);
-      }
+      // Split by both punctuation AND line breaks
+      const segments = [];
+      const lines = textWithPlaceholders.split(/\r?\n/);
+      
+      lines.forEach(line => {
+        // Split each line by punctuation
+        const lineSentences = line.match(/[^。.!?！？]+[。.!?！？]+/g) || [];
+        const remainingText = line.match(/[^。.!?！？]+$/);
+        
+        if (remainingText) {
+          lineSentences.push(remainingText[0]);
+        }
+        
+        segments.push(...lineSentences);
+      });
       
       const result = {};
       
-      sentences.filter(sentence => sentence.trim()).forEach((sentence, index) => {
+      segments.filter(segment => segment.trim()).forEach((segment, index) => {
+        // Restore URLs in each segment
+        const restoredSegment = segment.replace(/URL_PLACEHOLDER_(\d+)/g, () => {
+          const matches = segment.match(/URL_PLACEHOLDER_(\d+)/g);
+          for (const match of matches) {
+            const urlLength = parseInt(match.split('_')[2]);
+            const url = inputText.value.match(urlRegex).find(u => u.length === urlLength);
+            if (url) return url;
+          }
+          return '';
+        });
+        
         const sentenceId = index;
         result[sentenceId] = {
           lines: {},
-          sentencePinyin: getPinyinForSentence(sentence)
+          sentencePinyin: getPinyinForSentence(restoredSegment)
         };
         
-        const lines = splitIntoLines(sentence);     
+        // Split into lines (you might want to adjust this based on your needs)
+        // const lines = restoredSegment.split(/\r?\n/).filter(l => l.trim());
+        const lines = splitIntoLines(restoredSegment);
         lines.forEach((line, lineIndex) => {
-          const lineId = lineIndex;
-          result[sentenceId].lines[lineId] = {
+          result[sentenceId].lines[lineIndex] = {
             text: line,
             pinyin: getPinyinForSentence(line),
             textAndPinyin: getPinyinAndChar(line)
           };
         });
       });
-      
+      console.log(result);
       return result;
     });
 
@@ -317,7 +333,7 @@ export default {
             if (/[\u4e00-\u9fa5]/.test(char) && pinyinIndex < pinyinSyllables.length) {
                 return [char, pinyinSyllables[pinyinIndex++]];
             }
-            return [char, '']; // No pinyin for non-Chinese characters
+            return [char, ''];
         });
         
     } catch (error) {
@@ -423,6 +439,10 @@ export default {
 <style scoped>
 .line-characters-and-pinyin{
  padding: 5px 10px;
+ text-wrap: wrap;
+ width: 100%;
+ display: flex;
+ flex-wrap: wrap;
 }
 .paste-btn {  
   padding: 8px 16px;
@@ -515,22 +535,17 @@ export default {
 
 .converter-wrapper {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 10px;
+  /* display: flex; */
+  /* padding-bottom: 10px; */
 }
 
-.controls-section {
+/* .controls-section {
   width: 100%;
   position: sticky;
   top: 0;
-  /* padding-bottom: 10px; */
   background-color: white;
   z-index: 10;
-  /* padding: 1rem; */
-  /* border-bottom: 1px solid #eee; */
-  /* box-shadow: 0 3px 24px rgba(0, 0, 0, 0.08); */
-}
+} */
 
 .controls-container {
   display: flex;
@@ -542,7 +557,7 @@ export default {
 
 .main-content {
   display: block;
-  width: 100%;
+  /* width: 100%; */
   /* padding-top: 10px; */
 }
 
@@ -575,12 +590,18 @@ export default {
   border-radius: 4px;
   white-space: pre-wrap;
 }
+
 .comparison-section {
-  max-width: 1200px;
-  padding: 0 0.5rem 0 0.5rem;
+  max-width: 1200px; /* Same as input section */
+  margin: 0 auto; /* Center the container */
+  padding: 0 0.5rem;
 }
+/* .comparison-section {
+  max-width: 100%;
+  padding: 0 0.5rem 0 0.5rem;
+} */
 .comparison-display {
-  max-width: 1200px;
+  max-width: 100%;
 }
 
 .line-container {
@@ -594,6 +615,7 @@ export default {
   flex-wrap: wrap;
   background-color: rgba(255, 255, 255, 0.3);
   border-radius: 0.25rem;
+  padding: 0.5rem;
 }
 
 .character-container {
@@ -631,7 +653,6 @@ export default {
 .block-number {
   font-size: 0.875rem;
   color: #666;
-  /* margin-bottom: 0.5rem; */
 }
 
 .font-selector,
