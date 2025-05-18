@@ -1,17 +1,12 @@
 @font-face {
   font-family: 'Han_Sans_CN_Light';
-  src: url('/fonts/Han_Sans_CN_Light.otf') format('opentype');
+  src: url('/fonts/Han_Sans_CN_Light.otf') format('truetype');
   font-display: swap;
 }
 
-
-/* body {
-  background: #dcf4fe; 
-  background: -webkit-linear-gradient(to right, #fee1f7, #dcf4fe);
-  background: linear-gradient(to right, #fee1f7, #dcf4fe); 
-} */
-
 html {
+  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Han_Sans_CN_Light';
   min-height: 100%;
   height: 100%;
 }
