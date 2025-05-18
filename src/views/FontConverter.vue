@@ -23,72 +23,52 @@
 
       <!-- <ChineseTextToSpeech style="max-width: 1200px;" :text="inputText" /> -->
   
+
       <div v-if="inputText.trim()" class="comparison-section">
         <div class="comparison-display relative">
-            <!-- <button @click="copyToClipboard(getAllText(), 'parent')" class="copy-btn parent-copy-btn" title="Copy all text">
-              <component :is="copiedStates.parent ? 'CopiedIcon' : 'CopyIcon'" />
-            </button> -->
           <template v-if="comparisonData && Object.keys(comparisonData).length">
             <div v-for="(block, sentenceId) in comparisonData" :key="sentenceId" class="comparison-block relative">
-              <!-- <p class="block-number">B {{ parseInt(sentenceId) + 1 }}</p> -->
-
-              <!-- <button @click="copyToClipboard(getBlockText(block.lines), `block-${sentenceId}`)" class="copy-btn block-copy-btn" title="Copy block">
-                <component :is="copiedStates[`block-${sentenceId}`] ? 'CopiedIcon' : 'CopyIcon'" />
-              </button> -->
-              
-              <!-- 1 -->
-              <!-- <div class="line-container">
+              <!-- Original display with multiple lines -->
+              <div class="line-container">
                 <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
-                  <button @click="copyToClipboard(line.text, `line-${sentenceId}-${lineIndex}`)" class="copy-btn line-copy-btn" title="Copy line">
-                    <component :is="copiedStates[`line-${sentenceId}-${lineIndex}`] ? 'CopiedIcon' : 'CopyIcon'" />
-                  </button>
-                  
-                  
-                  <div class="character-container">
-                    <ChineseTextToSpeech style="max-width: 1200px;" :text="line.text" />
-                    <div v-for="(char, charIndex) in line.text" 
-                        :key="charIndex" 
-                        class="character-column" 
-                        :class="{ punctuation: isPunctuation(char) }">
-
-                        <div class="pinyin-text" v-if="!isPunctuation(char)" 
-                            :style="{ 
-                              fontFamily: getFontFamily, 
-                              fontSize: `${fontSize * 0.8}px` }">
-                          {{ getPinyinForChar(char) }}
-                        </div>
-
-                      <div class="character converted-text" 
-                          :style="{ 
-                            fontFamily: getFontFamily,
-                            fontSize: `${fontSize}px` }">
-                        {{ char }}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="line-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize * 0.8}px` }">
-                    {{ line.pinyin }}
-                  </div>
-
-                </div>
-              </div> -->
-              
-              <!-- 2 -->
-              <!-- Display sentence-level pinyin -->
-              <!-- <div class="line-container">
-                <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
-                  <div class="line-characters" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
-                    {{ line.text }}
-                  </div>
-
-                  <div class="line-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize * 0.8}px` }">
-                    {{ line.pinyin }}
+                  <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
+                    <span v-for="(pair, pairIndex) in line.textAndPinyin" :key="pairIndex">
+                      <span class="character" :style="{fontWeight: '700' }">{{ pair[0] }}</span>
+                      <span class="pinyin" :style="{fontSize: `${fontSize * 0.8}px`, display: showPinyin ? 'inline' : 'none' }">{{ pair[1] }}</span>
+                    </span>
                   </div>
                 </div>
-              </div> -->
+              </div>
 
-              <!-- 3 -->
+              <!-- Flattened display in a single line -->
+              <div class="line-container">
+                <div class="text-line relative">
+                  <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
+                    <span v-for="(pair, pairIndex) in flattenBlockLines(block)" :key="pairIndex">
+                      <span class="character" :style="{fontWeight: '700' }">{{ pair[0] }}</span>
+                      <span class="pinyin" :style="{fontSize: `${fontSize * 0.8}px`, display: showPinyin ? 'inline' : 'none' }">{{ pair[1] }}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div 
+              class="scroll-spacer"
+              :style="{
+                minHeight: `calc(66vh - ${fontSize * 2}px)`  // Adjust based on your font size
+              }"
+            ></div>
+          </template>
+          
+          <!-- <div v-else class="placeholder-text">
+            Enter Chinese text here
+          </div> -->
+        </div>
+      </div>
+      <!-- <div v-if="inputText.trim()" class="comparison-section">
+        <div class="comparison-display relative">
+          <template v-if="comparisonData && Object.keys(comparisonData).length">
+            <div v-for="(block, sentenceId) in comparisonData" :key="sentenceId" class="comparison-block relative">
               <div class="line-container">
                 <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
                   <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
@@ -115,7 +95,7 @@
           </div>
 
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -216,10 +196,8 @@ export default {
     };
 
     const splitIntoLines = text => {
-      // First split by newlines
       const newlineParts = text.split(/\r?\n/);
       
-      // Then split each part by commas
       return newlineParts.flatMap(part => {
         const commaParts = part.split('，');
         return commaParts
@@ -234,7 +212,22 @@ export default {
       });
     };
 
-
+    const flattenBlockLines = (blockObject) => {
+      const flattenedPairs = [];
+      
+      if (!blockObject || !blockObject.lines) {
+        return flattenedPairs;
+      }
+      
+      Object.values(blockObject.lines).forEach(line => {
+        if (line.textAndPinyin && Array.isArray(line.textAndPinyin)) {
+          line.textAndPinyin.forEach(pair => {
+            flattenedPairs.push(pair);
+          });
+        }
+      });
+      return flattenedPairs;
+    };
 
     const comparisonData = computed(() => {
       if (!inputText.value) return {};
@@ -281,7 +274,6 @@ export default {
           sentencePinyin: getPinyinForSentence(restoredSegment)
         };
         
-        // Split into lines (you might want to adjust this based on your needs)
         // const lines = restoredSegment.split(/\r?\n/).filter(l => l.trim());
         const lines = splitIntoLines(restoredSegment);
         lines.forEach((line, lineIndex) => {
@@ -292,7 +284,6 @@ export default {
           };
         });
       });
-      // console.log(result);
       return result;
     });
 
@@ -429,6 +420,7 @@ export default {
       textarea,
       copiedStates,
       clearText,
+      flattenBlockLines,
 
       showPinyin,
       togglePinyin,
@@ -446,6 +438,7 @@ export default {
 }
 .paste-btn {  
   padding: 8px 16px;
+  margin-top: 5px;
   font-size: 14px;
   background-color: #7a91ff;
   font-weight: 800;
@@ -655,11 +648,33 @@ export default {
   border-radius: 0.25rem;
   border: 0.5px solid #ddd;
 }
+textarea::placeholder {
+  font-weight: 700; /* Make it bold */
+  color: #cccccc; /* Light gray color */
+  opacity: 1; /* Ensure full visibility */
+}
 
-.placeholder-text {
-  color: #999;
-  text-align: center;
-  padding: 2rem;
+/* These are needed for cross-browser compatibility */
+textarea::-webkit-input-placeholder { /* Chrome/Safari/Opera */
+  font-weight: 700;
+  color: #cccccc;
+}
+
+textarea::-moz-placeholder { /* Firefox */
+  font-weight: 700;
+  color: #cccccc;
+  opacity: 1;
+}
+
+textarea:-ms-input-placeholder { /* IE/Edge */
+  font-weight: 700;
+  color: #cccccc;
+}
+
+textarea:-moz-placeholder { /* Firefox older versions */
+  font-weight: 700;
+  color: #cccccc;
+  opacity: 1;
 }
 
 @media (max-width: 1024px) {
