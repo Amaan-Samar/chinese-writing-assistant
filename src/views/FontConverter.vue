@@ -19,28 +19,12 @@
         :showPinyin="showPinyin"
         @clear="clearText"
         @toggle-pinyin="togglePinyin"
-      />
-
-      <!-- <ChineseTextToSpeech style="max-width: 1200px;" :text="inputText" /> -->
-  
+      />  
 
       <div v-if="inputText.trim()" class="comparison-section">
         <div class="comparison-display relative">
           <template v-if="comparisonData && Object.keys(comparisonData).length">
             <div v-for="(block, sentenceId) in comparisonData" :key="sentenceId" class="comparison-block relative">
-              <!-- Original display with multiple lines -->
-              <div class="line-container">
-                <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
-                  <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
-                    <span v-for="(pair, pairIndex) in line.textAndPinyin" :key="pairIndex">
-                      <span class="character" :style="{fontWeight: '700' }">{{ pair[0] }}</span>
-                      <span class="pinyin" :style="{fontSize: `${fontSize * 0.8}px`, display: showPinyin ? 'inline' : 'none' }">{{ pair[1] }}</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Flattened display in a single line -->
               <div class="line-container">
                 <div class="text-line relative">
                   <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
@@ -59,43 +43,9 @@
               }"
             ></div>
           </template>
-          
-          <!-- <div v-else class="placeholder-text">
-            Enter Chinese text here
-          </div> -->
         </div>
       </div>
-      <!-- <div v-if="inputText.trim()" class="comparison-section">
-        <div class="comparison-display relative">
-          <template v-if="comparisonData && Object.keys(comparisonData).length">
-            <div v-for="(block, sentenceId) in comparisonData" :key="sentenceId" class="comparison-block relative">
-              <div class="line-container">
-                <div v-for="(line, lineIndex) in block.lines" :key="lineIndex" class="text-line relative">
-                  <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
-                    <span v-for="(pair, pairIndex) in line.textAndPinyin" :key="pairIndex">
-                      <span class="character" :style="{fontWeight: '700' }">{{ pair[0] }}</span>
-                      <span class="pinyin" :style="{fontSize: `${fontSize * 0.8}px`, display: showPinyin ? 'inline' : 'none' }">{{ pair[1] }}</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
 
-            </div>
-            <div 
-              class="scroll-spacer"
-              :style="{
-                minHeight: `calc(66vh - ${fontSize * 2}px)`  // Adjust based on your font size
-              }"
-            ></div>
-
-          </template>
-          
-          <div v-else class="placeholder-text">
-            Enter Chinese text here
-          </div>
-
-        </div>
-      </div> -->
     </div>
   </div>
 </template>
