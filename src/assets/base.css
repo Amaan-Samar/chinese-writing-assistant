@@ -1,6 +1,7 @@
 @font-face {
   font-family: 'Han_Sans_CN_Light';
-  src: url('/fonts/Han_Sans_CN_Light.otf') format('truetype');
+  src: url('/fonts/Han_Sans_CN_Light.otf') format('opentype');
+  font-display: swap;
 }
 
 
