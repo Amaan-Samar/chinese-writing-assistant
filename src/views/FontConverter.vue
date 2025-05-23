@@ -417,64 +417,6 @@ export default {
   position: relative;
 }
 
-.copy-btn {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(240, 240, 240, 0.8);
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.2s, background-color 0.2s;
-  z-index: 10;
-}
-
-.copy-btn:hover {
-  opacity: 1;
-  background-color: rgba(220, 220, 220, 0.9);
-}
-
-.parent-copy-btn {
-  top: 10px;
-  right: 10px;
-  padding: 6px;
-}
-
-.block-copy-btn {
-  top: 10px;
-  right: 10px;
-  padding: 5px;
-}
-
-.line-copy-btn {
-  top: 5px;
-  right: 5px;
-  padding: 4px;
-}
-
-.copy-toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  z-index: 1000;
-  opacity: 0;
-  transition: opacity 0.3s, transform 0.3s;
-}
-
-.copy-toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-
-
 .converter-wrapper {
   width: 100%;
 }
@@ -515,8 +457,6 @@ export default {
 }
 
 .text-display {
-  /* min-height: 300px; */
-  /* border: 1px solid #ddd; */
   border-radius: 4px;
   white-space: pre-wrap;
 }
@@ -544,6 +484,7 @@ export default {
   border-radius: 0.25rem;
   padding: 0.5rem;
 }
+
 
 .select-input {
   padding: 0.5rem;
