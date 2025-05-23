@@ -7,7 +7,7 @@
       />
       <div class="input-display-row">
         <div class="text-section" :style="{fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
-          <textarea v-model="inputText" placeholder="Enter Chinese text here..." class="text-input w-full resize-none" @input="adjustHeight" ref="textarea"></textarea>
+          <textarea v-model="inputText" placeholder="Enter Chinese text here..." class="text-input w-full" @input="adjustHeight" ref="textarea"></textarea>
           <button @click="clearOrPasteText" class="paste-btn">
             {{ inputText.trim() ? 'Clear' : 'Paste' }}
           </button>
@@ -194,8 +194,8 @@ export default {
       
       lines.forEach(line => {
         // Split each line by punctuation
-        const lineSentences = line.match(/[^。.!?！？]+[。.!?！？]+/g) || [];
-        const remainingText = line.match(/[^。.!?！？]+$/);
+        const lineSentences = line.match(/[^。!?！？]+[。!?！？]+/g) || [];
+        const remainingText = line.match(/[^。!?！？]+$/);
         
         if (remainingText) {
           lineSentences.push(remainingText[0]);
@@ -508,14 +508,15 @@ export default {
 .text-input {
   padding: 0.5rem;
   border-radius: 4px;
-  font-size: 16px;
-  outline: none; 
-  background: rgba(255, 255, 255, 0.7);
+  border-color: #7a90ff87;
+  font-size: 12px;
+  outline-color: #7a91ff; 
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .text-display {
-  min-height: 300px;
-  border: 1px solid #ddd;
+  /* min-height: 300px; */
+  /* border: 1px solid #ddd; */
   border-radius: 4px;
   white-space: pre-wrap;
 }
@@ -544,86 +545,36 @@ export default {
   padding: 0.5rem;
 }
 
-.character-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-
-.character-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  min-width: auto;
-  padding: 0.25rem;
-}
-
-.character-column.punctuation {
-  min-width: auto;
-}
-
-.character {
-  text-align: center;
-  line-height: 1.2;
-  min-height: auto;
-}
-
-.pinyin-text {
-  font-size: 0.8em;
-  color: #2563eb;
-  text-align: center;
-  font-family: 'Arial', sans-serif;
-}
-
-.block-number {
-  font-size: 0.875rem;
-  color: #666;
-}
-
-.font-selector,
-.size-selector {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.font-selector select,
-.size-selector select {
-  width: 130px;
-}
-
 .select-input {
   padding: 0.5rem;
   border-radius: 0.25rem;
-  border: 0.5px solid #ddd;
 }
 textarea::placeholder {
-  font-weight: 700; /* Make it bold */
-  color: #cccccc; /* Light gray color */
+  border-color: #7a91ff;
+  color: #e4e3e3; /* Light gray color */
   opacity: 1; /* Ensure full visibility */
 }
 
 /* These are needed for cross-browser compatibility */
 textarea::-webkit-input-placeholder { /* Chrome/Safari/Opera */
-  font-weight: 700;
-  color: #cccccc;
+  border-color: #7a91ff;
+  color: #e4e3e3;
 }
 
 textarea::-moz-placeholder { /* Firefox */
-  font-weight: 700;
-  color: #cccccc;
+  border-color: #7a91ff;
+  color: #e4e3e3;
   opacity: 1;
 }
 
 textarea:-ms-input-placeholder { /* IE/Edge */
-  font-weight: 700;
-  color: #cccccc;
+  border-color: #7a91ff;
+  color: #e4e3e3;
 }
 
 textarea:-moz-placeholder { /* Firefox older versions */
-  font-weight: 700;
-  color: #cccccc;
+  border-color: #7a91ff;
+  color: #e4e3e3;
   opacity: 1;
 }
 
