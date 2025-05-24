@@ -28,10 +28,22 @@
               <div class="line-container">
                 <div class="text-line relative">
                   <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
-                    <span v-for="(pair, pairIndex) in flattenBlockLines(block)" :key="pairIndex">
+                    <!-- <span v-for="(pair, pairIndex) in flattenBlockLines(block)" :key="pairIndex">
                       <span class="character" :style="{fontWeight: '700' }">{{ pair[0] }}</span>
                       <span class="pinyin" :style="{fontSize: `${fontSize * 0.8}px`, display: showPinyin ? 'inline' : 'none' }">{{ pair[1] }}</span>
+                    </span> -->
+
+
+                  <!-- Replace this part in your template -->
+                  <span v-for="(pair, pairIndex) in flattenBlockLines(block)" :key="pairIndex">
+                    <span class="character" :style="{fontWeight: '700' }">
+                      {{ showPinyin ? pair[0] : (pair[0] === ' ' && pair[1] === ' ' ? ' ' : pair[0]) }}
                     </span>
+                    <span class="pinyin" :style="{fontSize: `${fontSize * 0.8}px`, display: showPinyin ? 'inline' : 'none' }">
+                      {{ pair[1] }}
+                    </span>
+                  </span>
+
                   </div>
                 </div>
               </div>
@@ -98,13 +110,14 @@ export default {
       if (!inputText.value) return [];
 
       const sentences =
-        inputText.value.match(/[^。.!?！？]+[。.!?！？]+/g) || [];
-      const remainingText = inputText.value.match(/[^。.!?！？]+$/);
+        inputText.value.match(/[^。!?！？]+[。!?！？]+/g) || [];
+      const remainingText = inputText.value.match(/[^。!?！？]+$/);
 
       if (remainingText) {
         sentences.push(remainingText[0]);
       }
-      return sentences.filter(sentence => sentence.trim());
+      return sentences.filter(sentence => sentence);
+      // return sentences.filter(sentence => sentence.trim());
     });
  
     const pasteFromClipboard = async () => {
@@ -257,32 +270,126 @@ export default {
       return pinyin(sentence);
     };
 
-    const getPinyinAndChar = sentence => {
-    if (!sentence) return [];
-    
-    const chars = sentence.split('');
-    if (!showPinyin.value) return chars.map(char => [char, '']);
+    // function preprocessing(sentence) {
+    //     const preprocessed_sentence = [];
+    //     let english_str = '';  // Changed from const to let since we need to modify it
+        
+    //     for (let char of sentence) {  // Fixed the iteration syntax
+    //         if (/[\u4e00-\u9fa5]/.test(char)) {
+    //             if (english_str) {
+    //                 preprocessed_sentence.push([english_str]);
+    //                 english_str = '';
+    //             }
+    //             preprocessed_sentence.push([char]);
+    //         } 
+    //         else if (/[a-zA-Z0-9\s]/.test(char)) {
+    //             english_str += char;
+    //         }
+    //     }
+        
+    //     if (english_str) {
+    //         preprocessed_sentence.push([english_str]);
+    //     }
+        
+    //     return preprocessed_sentence;
+    // };
+function preprocessing(sentence) {
+    const preprocessed_sentence = [];
+    let current_segment = '';
+    let current_type = null; // 'chinese', 'english', or 'symbol'
 
-    try {
-        // First extract only Chinese characters for pinyin conversion
-        const chineseChars = chars.filter(c => /[\u4e00-\u9fa5]/.test(c)).join('');
-        const pinyinString = pinyin(chineseChars);
-        const pinyinSyllables = pinyinString.split(' ');
+    const isChinese = char => /[\u4e00-\u9fa5]/.test(char);
+    const isEnglish = char => /[a-zA-Z0-9]/.test(char);
+    const isSpace = char => /\s/.test(char);
+    const isSymbol = char => /[。，？()_.""''=\[\]:《》【】（）！。，、：;'"『』「」]/.test(char);
+
+    for (const char of sentence) {
+        if (isChinese(char)) {
+            // If we were building an english or symbol segment, push it first
+            if (current_type && current_type !== 'chinese') {
+                preprocessed_sentence.push([current_segment]);
+                current_segment = '';
+            }
+            // Push individual Chinese characters as separate segments
+            if (current_segment) {
+                preprocessed_sentence.push([current_segment]);
+                current_segment = '';
+            }
+            preprocessed_sentence.push([char]);
+            current_type = 'chinese';
+        } 
+        else if (isEnglish(char) || isSpace(char)) {
+            // If we were building a symbol segment, push it first
+            if (current_type === 'symbol') {
+                preprocessed_sentence.push([current_segment]);
+                current_segment = '';
+            }
+            current_segment += char;
+            current_type = 'english';
+        }
+        else if (isSymbol(char)) {
+            // If we were building an english segment, push it first
+            if (current_type === 'english') {
+                preprocessed_sentence.push([current_segment]);
+                current_segment = '';
+            }
+            // Push individual symbols as separate segments
+            if (current_segment) {
+                preprocessed_sentence.push([current_segment]);
+                current_segment = '';
+            }
+            preprocessed_sentence.push([char]);
+            current_type = 'symbol';
+        }
+    }
+
+    // Push any remaining segment
+    if (current_segment) {
+        preprocessed_sentence.push([current_segment]);
+    }
+
+    return preprocessed_sentence;
+}
+
+    function getPinyin(sentence) {
+        const pinyinObj = [];
+        const preprocessedSentence = preprocessing(sentence);
+        
+        const chineseOnly = sentence.split('').filter(c => /[\u4e00-\u9fa5]/.test(c)).join('');
+        const chinesePinyin = pinyin(chineseOnly); // Get pinyin for Chinese only
+        
+        const pinyinParts = chinesePinyin.split(' ');
         
         let pinyinIndex = 0;
-        return chars.map(char => {
-            if (/[\u4e00-\u9fa5]/.test(char) && pinyinIndex < pinyinSyllables.length) {
-                return [char, pinyinSyllables[pinyinIndex++]];
-            }
-            return [char, ''];
-        });
         
-    } catch (error) {
+        for (const [text] of preprocessedSentence) {
+            if (/[\u4e00-\u9fa5]/.test(text)) {
+                // For Chinese characters, get the next pinyin
+                pinyinObj.push([text, pinyinParts[pinyinIndex] || '']);
+                pinyinIndex++;
+            } else {
+                pinyinObj.push([text, '']);
+            }
+        }
+        
+        return pinyinObj;
+    }
+
+    const getPinyinAndChar = sentence => {
+      if (!sentence) return [];
+      
+      const chars = preprocessing(sentence);
+      if (!showPinyin.value) return chars.map(char => [char[0], '']);
+
+      try {
+        // console.log(getPinyin("你好hello world随时how are you你好 and 123 are also included随时"));
+        return getPinyin(sentence);
+
+      } catch (error) {
         console.error('Error processing pinyin:', error);
         return chars.map(char => [char, '']);
-    }
-};
-
+      }
+    };
 
     const adjustHeight = () => {
       if (textarea.value) {
@@ -342,7 +449,7 @@ export default {
           }
         }
       }
-      return allText.trim();
+      return allText;
     };
     
     const getBlockText = (lines) => {
