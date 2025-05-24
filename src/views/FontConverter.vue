@@ -6,10 +6,33 @@
         :defaultFontSize="15"
       />
       <div class="input-display-row">
+        <!-- Chinese Text Input -->
         <div class="text-section" :style="{fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
-          <textarea v-model="inputText" placeholder="Enter Chinese text here..." class="text-input w-full" @input="adjustHeight" ref="textarea"></textarea>
-          <button @click="clearOrPasteText" class="paste-btn">
+          <textarea 
+            v-model="inputText" 
+            placeholder="Enter Chinese text here..." 
+            class="text-input w-full" 
+            @input="adjustHeight" 
+            @focus="setActiveTextarea('chinese')"
+            ref="chineseTextarea"
+          ></textarea>
+          <button @click="clearOrPasteText('chinese')" class="paste-btn">
             {{ inputText.trim() ? 'Clear' : 'Paste' }}
+          </button>
+        </div>
+
+        <!-- English Translation Input -->
+        <div class="text-section" :style="{fontSize: `${fontSize}px` }">
+          <textarea 
+            v-model="englishText" 
+            placeholder="Enter English translation here..." 
+            class="text-input w-full english-input" 
+            @input="adjustEnglishHeight" 
+            @focus="setActiveTextarea('english')"
+            ref="englishTextarea"
+          ></textarea>
+          <button @click="clearOrPasteText('english')" class="paste-btn">
+            {{ englishText.trim() ? 'Clear' : 'Paste' }}
           </button>
         </div>
       </div>
@@ -17,7 +40,7 @@
       <FloatingControls 
         v-if="inputText.trim()"
         :showPinyin="showPinyin"
-        @clear="clearText"
+        @clear="clearAllText"
         @toggle-pinyin="togglePinyin"
       />  
 
@@ -25,16 +48,18 @@
         <div class="comparison-display relative">
           <template v-if="comparisonData && Object.keys(comparisonData).length">
             <div v-for="(block, sentenceId) in comparisonData" :key="sentenceId" class="comparison-block relative">
+              
+              <!-- English Translation Display -->
+              <div v-if="englishSegments[sentenceId]" class="english-translation-box">
+                <div class="english-text" :style="{ fontSize: `${fontSize * 0.9}px` }">
+                  {{ englishSegments[sentenceId] }}
+                </div>
+              </div>
+
+              <!-- Chinese and Pinyin Display -->
               <div class="line-container">
                 <div class="text-line relative">
                   <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
-                    <!-- <span v-for="(pair, pairIndex) in flattenBlockLines(block)" :key="pairIndex">
-                      <span class="character" :style="{fontWeight: '700' }">{{ pair[0] }}</span>
-                      <span class="pinyin" :style="{fontSize: `${fontSize * 0.8}px`, display: showPinyin ? 'inline' : 'none' }">{{ pair[1] }}</span>
-                    </span> -->
-
-
-                  <!-- Replace this part in your template -->
                   <span v-for="(pair, pairIndex) in flattenBlockLines(block)" :key="pairIndex">
                     <span class="character" :style="{fontWeight: '700' }">
                       {{ showPinyin ? pair[0] : (pair[0] === ' ' && pair[1] === ' ' ? ' ' : pair[0]) }}
@@ -83,16 +108,22 @@ export default {
   name: 'FontConverter',
   setup() {
     const inputText = ref('');
+    const englishText = ref('');
     const fontSize = ref(15);
     const selectedFont = ref('Han_Sans_CN_Light');
-    // const selectedFont = ref('kaiti');
-    const textarea = ref(null);
+    const chineseTextarea = ref(null);
+    const englishTextarea = ref(null);
+    const activeTextarea = ref('chinese'); // Track which textarea is active
     const copiedStates = reactive({});
     const COPIED_ICON_DURATION = 3000;
     const showPinyin = ref(true);
 
     const togglePinyin = () => {
       showPinyin.value = !showPinyin.value;
+    };
+
+    const setActiveTextarea = (type) => {
+      activeTextarea.value = type;
     };
 
     const fonts = {
@@ -106,6 +137,34 @@ export default {
 
     const getFontFamily = computed(() => fonts[selectedFont.value]);
 
+    // Function to break English text into paragraphs that match Chinese paragraphs
+    const breakEnglishText = (englishText, chineseSegments) => {
+      if (!englishText.trim()) return {};
+      
+      // Split English text by paragraphs (double line breaks or single line breaks)
+      const englishParagraphs = englishText
+        .split(/\n\s*\n|\r\n\s*\r\n/) // Split by double line breaks first
+        .flatMap(para => para.split(/\n|\r\n/)) // Then split by single line breaks
+        .map(para => para.trim())
+        .filter(para => para);
+      
+      // Create mapping between Chinese and English paragraphs
+      const result = {};
+      const chineseSegmentKeys = Object.keys(chineseSegments);
+      
+      englishParagraphs.forEach((paragraph, index) => {
+        if (index < chineseSegmentKeys.length) {
+          result[chineseSegmentKeys[index]] = paragraph;
+        }
+      });
+      
+      return result;
+    };
+
+    const englishSegments = computed(() => {
+      return breakEnglishText(englishText.value, comparisonData.value);
+    });
+
     const textBlocks = computed(() => {
       if (!inputText.value) return [];
 
@@ -117,44 +176,58 @@ export default {
         sentences.push(remainingText[0]);
       }
       return sentences.filter(sentence => sentence);
-      // return sentences.filter(sentence => sentence.trim());
     });
  
-    const pasteFromClipboard = async () => {
+    const pasteFromClipboard = async (target = null) => {
       try {
         const clipboardText = await navigator.clipboard.readText();
-        inputText.value = clipboardText;
+        const targetType = target || activeTextarea.value;
+        
+        if (targetType === 'chinese') {
+          inputText.value = clipboardText;
+        } else {
+          englishText.value = clipboardText;
+        }
       } catch (error) {
         console.error('Failed to read clipboard contents: ', error);
       }
     };
 
-    const clearText = () => {
-      inputText.value = '';
-
-      if (textarea.value) {
-        setTimeout(() => {
-          textarea.value.style.height = 'auto';
-          textarea.value.style.height = '40px';
-        },0);
+    const clearText = (type = 'both') => {
+      if (type === 'chinese' || type === 'both') {
+        inputText.value = '';
+        if (chineseTextarea.value) {
+          setTimeout(() => {
+            chineseTextarea.value.style.height = 'auto';
+            chineseTextarea.value.style.height = '40px';
+          }, 0);
+        }
+      }
+      
+      if (type === 'english' || type === 'both') {
+        englishText.value = '';
+        if (englishTextarea.value) {
+          setTimeout(() => {
+            englishTextarea.value.style.height = 'auto';
+            englishTextarea.value.style.height = '40px';
+          }, 0);
+        }
       }
     };
 
-    const clearOrPasteText = () => {
-      if (inputText.value.trim()) {
+    const clearAllText = () => {
+      clearText('both');
+    };
+
+    const clearOrPasteText = (type) => {
+      const text = type === 'chinese' ? inputText.value : englishText.value;
+      
+      if (text.trim()) {
         // If there's text, clear it
-        inputText.value = '';
-        
-        // Reset the textarea height
-        if (textarea.value) {
-          setTimeout(() => {
-            textarea.value.style.height = 'auto';
-            textarea.value.style.height = '40px';
-          }, 0);
-        }
+        clearText(type);
       } else {
         // If empty, paste from clipboard
-        pasteFromClipboard();
+        pasteFromClipboard(type);
       }
     };
 
@@ -195,58 +268,30 @@ export default {
     const comparisonData = computed(() => {
       if (!inputText.value) return {};
       
-      // First extract URLs so they don't get split by punctuation
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const textWithPlaceholders = inputText.value.replace(urlRegex, (url) => {
-        return ` URL_PLACEHOLDER_${url.length} `; // Replace URL with a unique placeholder
-      });
-      
-      // Split by both punctuation AND line breaks
-      const segments = [];
-      const lines = textWithPlaceholders.split(/\r?\n/);
-      
-      lines.forEach(line => {
-        // Split each line by punctuation
-        const lineSentences = line.match(/[^。!?！？]+[。!?！？]+/g) || [];
-        const remainingText = line.match(/[^。!?！？]+$/);
-        
-        if (remainingText) {
-          lineSentences.push(remainingText[0]);
-        }
-        
-        segments.push(...lineSentences);
-      });
+      // Split Chinese text by paragraphs (line breaks)
+      const chineseParagraphs = inputText.value
+        .split(/\n\s*\n|\r\n\s*\r\n/) // Split by double line breaks first
+        .flatMap(para => para.split(/\n|\r\n/)) // Then split by single line breaks
+        .map(para => para.trim())
+        .filter(para => para);
       
       const result = {};
       
-      segments.filter(segment => segment.trim()).forEach((segment, index) => {
-        // Restore URLs in each segment
-        const restoredSegment = segment.replace(/URL_PLACEHOLDER_(\d+)/g, () => {
-          const matches = segment.match(/URL_PLACEHOLDER_(\d+)/g);
-          for (const match of matches) {
-            const urlLength = parseInt(match.split('_')[2]);
-            const url = inputText.value.match(urlRegex).find(u => u.length === urlLength);
-            if (url) return url;
-          }
-          return '';
-        });
-        
+      chineseParagraphs.forEach((paragraph, index) => {
         const sentenceId = index;
         result[sentenceId] = {
           lines: {},
-          sentencePinyin: getPinyinForSentence(restoredSegment)
+          sentencePinyin: getPinyinForSentence(paragraph)
         };
         
-        // const lines = restoredSegment.split(/\r?\n/).filter(l => l.trim());
-        const lines = splitIntoLines(restoredSegment);
-        lines.forEach((line, lineIndex) => {
-          result[sentenceId].lines[lineIndex] = {
-            text: line,
-            pinyin: getPinyinForSentence(line),
-            textAndPinyin: getPinyinAndChar(line)
-          };
-        });
+        // For paragraphs, we treat the entire paragraph as one "line"
+        result[sentenceId].lines[0] = {
+          text: paragraph,
+          pinyin: getPinyinForSentence(paragraph),
+          textAndPinyin: getPinyinAndChar(paragraph)
+        };
       });
+      
       return result;
     });
 
@@ -270,86 +315,63 @@ export default {
       return pinyin(sentence);
     };
 
-    // function preprocessing(sentence) {
-    //     const preprocessed_sentence = [];
-    //     let english_str = '';  // Changed from const to let since we need to modify it
-        
-    //     for (let char of sentence) {  // Fixed the iteration syntax
-    //         if (/[\u4e00-\u9fa5]/.test(char)) {
-    //             if (english_str) {
-    //                 preprocessed_sentence.push([english_str]);
-    //                 english_str = '';
-    //             }
-    //             preprocessed_sentence.push([char]);
-    //         } 
-    //         else if (/[a-zA-Z0-9\s]/.test(char)) {
-    //             english_str += char;
-    //         }
-    //     }
-        
-    //     if (english_str) {
-    //         preprocessed_sentence.push([english_str]);
-    //     }
-        
-    //     return preprocessed_sentence;
-    // };
-function preprocessing(sentence) {
-    const preprocessed_sentence = [];
-    let current_segment = '';
-    let current_type = null; // 'chinese', 'english', or 'symbol'
+    function preprocessing(sentence) {
+        const preprocessed_sentence = [];
+        let current_segment = '';
+        let current_type = null; // 'chinese', 'english', or 'symbol'
 
-    const isChinese = char => /[\u4e00-\u9fa5]/.test(char);
-    const isEnglish = char => /[a-zA-Z0-9]/.test(char);
-    const isSpace = char => /\s/.test(char);
-    const isSymbol = char => /[。，？()_.""''=\[\]:《》【】（）！。，、：;'"『』「」]/.test(char);
+        const isChinese = char => /[\u4e00-\u9fa5]/.test(char);
+        const isEnglish = char => /[a-zA-Z0-9]/.test(char);
+        const isSpace = char => /\s/.test(char);
+        const isSymbol = char => /[。，？()_.""''=\[\]:《》【】（）！。，、：;'"『』「」]/.test(char);
 
-    for (const char of sentence) {
-        if (isChinese(char)) {
-            // If we were building an english or symbol segment, push it first
-            if (current_type && current_type !== 'chinese') {
-                preprocessed_sentence.push([current_segment]);
-                current_segment = '';
+        for (const char of sentence) {
+            if (isChinese(char)) {
+                // If we were building an english or symbol segment, push it first
+                if (current_type && current_type !== 'chinese') {
+                    preprocessed_sentence.push([current_segment]);
+                    current_segment = '';
+                }
+                // Push individual Chinese characters as separate segments
+                if (current_segment) {
+                    preprocessed_sentence.push([current_segment]);
+                    current_segment = '';
+                }
+                preprocessed_sentence.push([char]);
+                current_type = 'chinese';
+            } 
+            else if (isEnglish(char) || isSpace(char)) {
+                // If we were building a symbol segment, push it first
+                if (current_type === 'symbol') {
+                    preprocessed_sentence.push([current_segment]);
+                    current_segment = '';
+                }
+                current_segment += char;
+                current_type = 'english';
             }
-            // Push individual Chinese characters as separate segments
-            if (current_segment) {
-                preprocessed_sentence.push([current_segment]);
-                current_segment = '';
+            else if (isSymbol(char)) {
+                // If we were building an english segment, push it first
+                if (current_type === 'english') {
+                    preprocessed_sentence.push([current_segment]);
+                    current_segment = '';
+                }
+                // Push individual symbols as separate segments
+                if (current_segment) {
+                    preprocessed_sentence.push([current_segment]);
+                    current_segment = '';
+                }
+                preprocessed_sentence.push([char]);
+                current_type = 'symbol';
             }
-            preprocessed_sentence.push([char]);
-            current_type = 'chinese';
-        } 
-        else if (isEnglish(char) || isSpace(char)) {
-            // If we were building a symbol segment, push it first
-            if (current_type === 'symbol') {
-                preprocessed_sentence.push([current_segment]);
-                current_segment = '';
-            }
-            current_segment += char;
-            current_type = 'english';
         }
-        else if (isSymbol(char)) {
-            // If we were building an english segment, push it first
-            if (current_type === 'english') {
-                preprocessed_sentence.push([current_segment]);
-                current_segment = '';
-            }
-            // Push individual symbols as separate segments
-            if (current_segment) {
-                preprocessed_sentence.push([current_segment]);
-                current_segment = '';
-            }
-            preprocessed_sentence.push([char]);
-            current_type = 'symbol';
+
+        // Push any remaining segment
+        if (current_segment) {
+            preprocessed_sentence.push([current_segment]);
         }
-    }
 
-    // Push any remaining segment
-    if (current_segment) {
-        preprocessed_sentence.push([current_segment]);
+        return preprocessed_sentence;
     }
-
-    return preprocessed_sentence;
-}
 
     function getPinyin(sentence) {
         const pinyinObj = [];
@@ -382,9 +404,7 @@ function preprocessing(sentence) {
       if (!showPinyin.value) return chars.map(char => [char[0], '']);
 
       try {
-        // console.log(getPinyin("你好hello world随时how are you你好 and 123 are also included随时"));
         return getPinyin(sentence);
-
       } catch (error) {
         console.error('Error processing pinyin:', error);
         return chars.map(char => [char, '']);
@@ -392,19 +412,31 @@ function preprocessing(sentence) {
     };
 
     const adjustHeight = () => {
-      if (textarea.value) {
-        textarea.value.style.height = 'auto'; // Reset height to auto
+      if (chineseTextarea.value) {
+        chineseTextarea.value.style.height = 'auto';
 
-        // if there's no text, set a default height
         if (!inputText.value.trim()) {
-          textarea.value.style.height = '40px';
-        }else {
-          textarea.value.style.height = `${textarea.value.scrollHeight}px`;
+          chineseTextarea.value.style.height = '40px';
+        } else {
+          chineseTextarea.value.style.height = `${chineseTextarea.value.scrollHeight}px`;
+        }
+      }
+    };
+
+    const adjustEnglishHeight = () => {
+      if (englishTextarea.value) {
+        englishTextarea.value.style.height = 'auto';
+
+        if (!englishText.value.trim()) {
+          englishTextarea.value.style.height = '40px';
+        } else {
+          englishTextarea.value.style.height = `${englishTextarea.value.scrollHeight}px`;
         }
       }
     };
 
     watch(inputText, adjustHeight);
+    watch(englishText, adjustEnglishHeight);
 
     const copyToClipboard = (text, buttonId) => {
       navigator.clipboard.writeText(text)
@@ -464,23 +496,29 @@ function preprocessing(sentence) {
       getAllText,
       getBlockText,
       inputText,
+      englishText,
       selectedFont,
       fontSize,
       getFontFamily,
       textBlocks,
       comparisonData,
+      englishSegments,
       fonts,
       splitIntoLines,
       isPunctuation,
       getPinyinForChar,
       adjustHeight,
-      textarea,
+      adjustEnglishHeight,
+      chineseTextarea,
+      englishTextarea,
       copiedStates,
       clearText,
+      clearAllText,
       flattenBlockLines,
-
       showPinyin,
       togglePinyin,
+      setActiveTextarea,
+      activeTextarea,
     };
   },
 };
@@ -493,6 +531,34 @@ function preprocessing(sentence) {
  display: flex;
  flex-wrap: wrap;
 }
+
+.english-translation-box {
+  /* background-color: rgba(135, 206, 235, 0.2);
+  border: 1px solid rgba(135, 206, 235, 0.4); */
+  background-color: rgba(255, 255, 255, 0.3); 
+  font-style: italic;
+  /* border-radius: 6px;
+  padding: 6px 8px; */
+  /* margin-bottom: 6px; */
+  /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+}
+
+.english-text {
+  color: #2c3e50;
+  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  white-space: pre-wrap; /* Preserve line breaks within paragraphs */
+}
+
+.english-input {
+  border-color: #5dade2 !important;
+  outline-color: #5dade2 !important;
+}
+
+.english-input::placeholder {
+  color: #5dade2 !important;
+}
+
 .paste-btn {  
   padding: 8px 16px;
   margin-top: 5px;
@@ -552,6 +618,7 @@ function preprocessing(sentence) {
 .text-section {
   width: 100%;
   padding: 0 0.2rem;
+  margin-bottom: 15px;
 }
 
 .text-input {
@@ -578,6 +645,10 @@ function preprocessing(sentence) {
   max-width: 100%;
 }
 
+.comparison-block {
+  margin-bottom: 20px;
+}
+
 .line-container {
   background-color: rgba(255, 255, 255, 0.3);
   display: flex;
@@ -587,9 +658,12 @@ function preprocessing(sentence) {
 .text-line {
   display: block;
   flex-wrap: wrap;
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(135, 206, 235, 0.2);
+  border: 1px solid rgba(135, 206, 235, 0.4);
+  /* background-color: rgba(255, 255, 255, 0.3); */
   border-radius: 0.25rem;
-  padding: 0.5rem;
+  padding: 0.2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -599,30 +673,35 @@ function preprocessing(sentence) {
 }
 textarea::placeholder {
   border-color: #7a91ff;
-  color: #e4e3e3; /* Light gray color */
-  opacity: 1; /* Ensure full visibility */
+  color: #0000004d;
+  font-style: italic; 
+  opacity: 1;
 }
 
 /* These are needed for cross-browser compatibility */
 textarea::-webkit-input-placeholder { /* Chrome/Safari/Opera */
   border-color: #7a91ff;
-  color: #e4e3e3;
+  color: #0000004d;
+  font-style: italic;
 }
 
 textarea::-moz-placeholder { /* Firefox */
   border-color: #7a91ff;
-  color: #e4e3e3;
+  color: #0000004d;
+  font-style: italic;
   opacity: 1;
 }
 
 textarea:-ms-input-placeholder { /* IE/Edge */
   border-color: #7a91ff;
-  color: #e4e3e3;
+  color: #0000004d;
+  font-style: italic;
 }
 
 textarea:-moz-placeholder { /* Firefox older versions */
   border-color: #7a91ff;
-  color: #e4e3e3;
+  color: #0000004d;
+  font-style: italic;
   opacity: 1;
 }
 
