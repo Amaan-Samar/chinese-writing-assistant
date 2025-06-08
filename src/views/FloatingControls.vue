@@ -79,10 +79,10 @@ export default {
 }
 
 .toggle-pinyin-btn {
-  background-color: #7a91ff;
-  box-shadow: #5E5DF0 0 10px 20px -10px;
+  background-color: white;
+  box-shadow: rgb(179, 178, 178) 0 10px 20px -10px;
   border-radius: 50%;
-  color: white;
+  color: black;
   font-weight: 800;
   cursor: pointer;
   width: 40px;

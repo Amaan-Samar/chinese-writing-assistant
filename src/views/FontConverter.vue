@@ -51,7 +51,7 @@
               
               <!-- English Translation Display -->
               <div v-if="englishSegments[sentenceId]" class="english-translation-box">
-                <div class="english-text" :style="{ fontSize: `${fontSize * 0.9}px` }">
+                <div class="english-text" :style="{ fontSize: `${fontSize * 0.8}px`, lineHeight: '1.1' }">
                   {{ englishSegments[sentenceId] }}
                 </div>
               </div>
@@ -61,7 +61,7 @@
                 <div class="text-line relative">
                   <div class="line-characters-and-pinyin" :style="{ fontFamily: getFontFamily, fontSize: `${fontSize}px` }">
                   <span v-for="(pair, pairIndex) in flattenBlockLines(block)" :key="pairIndex">
-                    <span class="character" :style="{fontWeight: '700' }">
+                    <span class="character" :style="{fontWeight: '600' }">
                       {{ showPinyin ? pair[0] : (pair[0] === ' ' && pair[1] === ' ' ? ' ' : pair[0]) }}
                     </span>
                     <span class="pinyin" :style="{fontSize: `${fontSize * 0.8}px`, display: showPinyin ? 'inline' : 'none' }">
@@ -72,6 +72,7 @@
                   </div>
                 </div>
               </div>
+
             </div>
             <div 
               class="scroll-spacer"
@@ -94,6 +95,7 @@ import FloatingControls from './FloatingControls.vue';
 import { ref, computed, watch, reactive} from 'vue';
 import { pinyin } from 'pinyin-pro';
 import FontControls from './FontControls.vue';
+// import FontControls from './FontControls.vue';
 
 
 
@@ -525,7 +527,7 @@ export default {
 </script>
 <style scoped>
 .line-characters-and-pinyin{
- padding: 5px 10px;
+ /* padding: 5px 10px; */
  text-wrap: wrap;
  width: 100%;
  display: flex;
@@ -533,14 +535,7 @@ export default {
 }
 
 .english-translation-box {
-  /* background-color: rgba(135, 206, 235, 0.2);
-  border: 1px solid rgba(135, 206, 235, 0.4); */
   background-color: rgba(255, 255, 255, 0.3); 
-  font-style: italic;
-  /* border-radius: 6px;
-  padding: 6px 8px; */
-  /* margin-bottom: 6px; */
-  /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
 }
 
 .english-text {
@@ -563,11 +558,11 @@ export default {
   padding: 8px 16px;
   margin-top: 5px;
   font-size: 14px;
-  background-color: #7a91ff;
+  background-color: white;
   font-weight: 800;
   border-radius: 4px;
-  box-shadow: #5E5DF0 0 10px 20px -10px;
-  color: white;
+  box-shadow: rgb(216, 215, 215) 0 10px 20px -10px;
+  color: black;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -584,7 +579,7 @@ export default {
 }
 
 .paste-btn:hover {
-  background-color: #545bc0;
+  background-color: #c9cacb;
 }
 .relative {
   position: relative;
@@ -658,9 +653,8 @@ export default {
 .text-line {
   display: block;
   flex-wrap: wrap;
-  background-color: rgba(135, 206, 235, 0.2);
-  border: 1px solid rgba(135, 206, 235, 0.4);
-  /* background-color: rgba(255, 255, 255, 0.3); */
+  background-color: rgba(256, 256, 256, 0.4);
+  /* border: 1px solid rgba(135, 206, 235, 0.4); */
   border-radius: 0.25rem;
   padding: 0.2rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -674,7 +668,6 @@ export default {
 textarea::placeholder {
   border-color: #7a91ff;
   color: #0000004d;
-  font-style: italic; 
   opacity: 1;
 }
 
@@ -682,26 +675,22 @@ textarea::placeholder {
 textarea::-webkit-input-placeholder { /* Chrome/Safari/Opera */
   border-color: #7a91ff;
   color: #0000004d;
-  font-style: italic;
 }
 
 textarea::-moz-placeholder { /* Firefox */
   border-color: #7a91ff;
   color: #0000004d;
-  font-style: italic;
   opacity: 1;
 }
 
 textarea:-ms-input-placeholder { /* IE/Edge */
   border-color: #7a91ff;
   color: #0000004d;
-  font-style: italic;
 }
 
 textarea:-moz-placeholder { /* Firefox older versions */
   border-color: #7a91ff;
   color: #0000004d;
-  font-style: italic;
   opacity: 1;
 }
 
@@ -739,3 +728,172 @@ textarea:-moz-placeholder { /* Firefox older versions */
   }
 }
 </style>
+
+
+
+<!-- 
+<script>
+const breakingEnglishtext = (englishText, chineseSegments) => {
+  if (!englishText.trim()) return ();
+
+  // Splite English text by paragrapghs (double line breaks or single line breaks)
+  const englishPasagraphs = englishText
+    .split(/\n\s*\n|\r\n\s*\r\n/) // Split by double lines breaks first
+    .flatMap(para => para.split(/\n|\r\n/)) // Then split by single line breaks
+    .map(para => para.trrim())
+    .filter(para => para);
+
+  // Create mapping between Chinese and English paragraphs
+  const result = {};
+  const chineseSegmentKeys = Object.keys(chineseSegments);
+
+  engilishParagraphs.forEach((paragraph, index) => {
+    if (index < chineseSegmentKeys.length) {
+      result[chineseSegmentKeys[index]] = paragraph;
+    }
+  });
+
+  return result;
+};
+
+const englishSegments = computed(() => {
+  return breakEnglishText(englishText.value, comparisonData.value);
+});
+
+const textBlocks = computed(() => {
+  if (!inputText.value) return [];
+
+  const sentences =
+    inputText.value.match(/[^。!?!?]+[。!?!?]+/g) || [];
+  const remaningText = inputText.value.match(/[^。 !?!?]+$/);
+
+  if (remaningText){
+    sentences.push(remaningText[0]);
+  };
+  return sentences.filter(sentence => sentence);
+});
+
+const pastFromClipboard = async (target = null) => {
+  try {
+    const clipboardText = await navigator.clipboard.readText();
+    const targetType = target || activeTextarea.value;
+
+    if (targetTyle === 'chinese') {
+      inputText.value = clipboardText;
+    } else {
+      englishText.value = clipboardText;
+    }
+  } catch (error) {
+    console.error('Failed to read clipboard contents': error);
+  }
+};
+
+conat clearText = (type = 'both') => {
+  if (type === 'chinese' || type === 'both') {
+    inputText.value = '';
+    if (chineseTextarea.value){
+      setTimeout(() => {
+        chineseTextarea.value.style.height = 'auto';
+        chineseTextarea.value.style.height = '40px';
+      },0);
+    }
+  }
+
+  if (type === 'english' || type === 'both') {
+    englishText.value = '';
+    if (englishTextarea.value) {
+      setTimeout(()=> {
+        englishTextarea.value.style.height = 'auto';
+        englishTextarea.value.style.height = '40px';
+      },0);
+    }
+  }
+};
+
+
+const clearAllText = () => {
+  clearText('both');
+};
+
+const clearOrPasteText = (type) => {
+  const text = type === 'chinese' ? inputtext.value : englishText.value;
+
+  if (text.trim()) {
+    // if there's text, clear it
+    clear(type);
+  } else {
+    // if emmpty, paste from clipboard
+    pasteFromClipboard(type);
+  }
+};
+
+const splitIntolines = text => {
+  const newlineParts = text.split(/\r?\n/);
+
+  return newlineParts.flatMap(part => {
+    const commaParts = part.split(',');
+    return commaParts
+      .map((line, index) => {
+        if (index < commaParts.length -1 || parts.endsWith(',')) {
+          return line.trim() + ',';
+        } else {
+          return line.trim();
+        }
+      })
+       .filter(line => line);
+  });
+};
+
+const flattenBlockLines = (blockObject) => {
+  const flattenedPairs = [];
+
+  if (!blockObject || !blockObject.lines){
+    return flattenedPairs;
+  }
+
+  Object.values(blockObject.lines).forEach(line => {
+    if (line.textAndPinyin && Array.isArray(line.textAndPinyin)) {
+      line.textAndPinyin.forEach(pair => {
+        flattenedPairs.push(pair);
+      });
+    }
+  });
+  return flattenedPairs;
+};
+
+const comparisonData = computed(() => {
+  if (!inputText.value) return {};
+
+  // Split chinese text by paragraphs (line breaks)
+  const chineseParagraphs = inputText.value
+    .split(/\n\s*\n|\r\n\s*\r\n) // Split by double line breaks first
+    .flatMap(para => para.split(/\n|\r\n/)) // Then split by single line breaks
+    .map(para => para.trim())
+    .filter(para => para);
+
+  const result = {};
+
+  chineseParagraphs.forEach((paragrapgh, index) => {
+    const sentenceId = index;
+    result[sentanceId] = {
+      lines: {},
+      sentancePinyin: getPinyinForSentences(paragraph)
+    };
+
+    // For paragraphs, we treat the entire paragraph as one "line"
+    result[sentenceId].lines[0] = {
+      text: paragraph,
+      pinyin: getpinyinForSentence(paragraph),
+      textAndPinyin: getPinyinAndChar(paragraph)
+    };
+  });
+  retun result;
+});
+
+const isPunctuation = char => {
+  const punctuationRegex = /[《》【】（）！？。，、：；'"『』「」]/;
+  
+}
+
+</script> -->
+
