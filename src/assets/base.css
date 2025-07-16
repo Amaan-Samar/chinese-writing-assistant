@@ -12,13 +12,14 @@ html {
 }
 
 body {
-  min-height: 100%;
+  min-height: 100vh;
   background: radial-gradient(
     circle at top center,
-    #fee1f799 0%,
-    #dcf4fe 25%,
+    #f5f7fa 0%,
+    #c3cfe2 25%,
     white 70%
   );
+  /* background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); */
   background-attachment: fixed;
   margin: 0;
 }
