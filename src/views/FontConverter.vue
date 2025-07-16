@@ -228,42 +228,42 @@ export default {
       }
     };
 
-    const fetchUrlContent = async () => {
-      if (!fetchUrl.value.trim()) {
-        fetchError.value = 'Please enter a URL';
-        return;
-      }
+    // const fetchUrlContent = async () => {
+    //   if (!fetchUrl.value.trim()) {
+    //     fetchError.value = 'Please enter a URL';
+    //     return;
+    //   }
 
-      loading.value = true;
-      fetchError.value = '';
-      fetchSuccess.value = false;
-      htmlContent.value = '';
+    //   loading.value = true;
+    //   fetchError.value = '';
+    //   fetchSuccess.value = false;
+    //   htmlContent.value = '';
 
-      try {
-        // First try direct fetch (will work for same-origin or CORS-enabled sites)
-        let content;
-        try {
-          const directResponse = await fetch(fetchUrl.value);
-          if (directResponse.ok) {
-            content = await directResponse.text();
-          } else {
-            throw new Error('Direct fetch failed, trying proxy...');
-          }
-        } catch (directError) {
-          console.log('Direct fetch failed, using CORS proxy...');
-          content = await fetchWithProxy(fetchUrl.value);
-        }
+    //   try {
+    //     // First try direct fetch (will work for same-origin or CORS-enabled sites)
+    //     let content;
+    //     try {
+    //       const directResponse = await fetch(fetchUrl.value);
+    //       if (directResponse.ok) {
+    //         content = await directResponse.text();
+    //       } else {
+    //         throw new Error('Direct fetch failed, trying proxy...');
+    //       }
+    //     } catch (directError) {
+    //       console.log('Direct fetch failed, using CORS proxy...');
+    //       content = await fetchWithProxy(fetchUrl.value);
+    //     }
 
-        htmlContent.value = content;
-        fetchSuccess.value = true;
-        fetchError.value = '';
-      } catch (err) {
-        fetchError.value = `Failed to fetch URL: ${err.message}`;
-        htmlContent.value = '';
-      } finally {
-        loading.value = false;
-      }
-    };
+    //     htmlContent.value = content;
+    //     fetchSuccess.value = true;
+    //     fetchError.value = '';
+    //   } catch (err) {
+    //     fetchError.value = `Failed to fetch URL: ${err.message}`;
+    //     htmlContent.value = '';
+    //   } finally {
+    //     loading.value = false;
+    //   }
+    // };
 
     const copyHtmlContent = async () => {
       try {
@@ -498,7 +498,7 @@ export default {
         const isChinese = char => /[\u4e00-\u9fa5]/.test(char);
         const isEnglish = char => /[a-zA-Z0-9]/.test(char);
         const isSpace = char => /\s/.test(char);
-        const isSymbol = char => /[。，？()_.""''=\[\]:《》【】（）！。，、：;'"『』「」]/.test(char);
+        const isSymbol = char => /[。，？%#@*&^$!-><()_.""''=\[\]:《》【】（）！。，、：;'"『』「」]/.test(char);
 
         for (const char of sentence) {
             if (isChinese(char)) {
@@ -700,7 +700,7 @@ export default {
       loading,
       fetchError,
       fetchSuccess,
-      fetchUrlContent,
+      // fetchUrlContent,
       copyHtmlContent,
       downloadHtml,
       clearHtmlContent,
