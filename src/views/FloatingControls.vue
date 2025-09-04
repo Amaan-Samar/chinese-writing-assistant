@@ -7,14 +7,14 @@
     >
     <ClearScreen />
     </button>
-    <button
+    <!-- <button
       class="toggle-pinyin-btn"
       :class="{ 'mobile': isMobile }"
       role="button"
       @click="$emit('toggle-pinyin')"
     >
       {{ showPinyin ? 'Hide' : 'Show' }}
-    </button>
+    </button> -->
   </div>
 </template>
 
@@ -72,7 +72,7 @@ export default {
   z-index: 1000;
 }
 
-.floating-controls.mobile {
+.floating-controls {
   top: auto;
   bottom: 10px;
   right: -10px;

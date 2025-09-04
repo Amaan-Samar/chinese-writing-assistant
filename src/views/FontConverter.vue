@@ -90,25 +90,18 @@
 </template>
 
 <script>
-import CopyIcon from './icons/CopyIcon.vue';
-import CopiedIcon from './icons/CopiedIcon.vue';
-import ChineseTextToSpeech from './ChineseTextToSpeech.vue'; 
 import FloatingControls from './FloatingControls.vue';
 import { ref, computed, watch, reactive} from 'vue';
 import { pinyin } from 'pinyin-pro';
 import FontControls from './FontControls.vue';
-// Initialize custom URL listener when component mounts
-import { onMounted } from 'vue';
+
 
 
 
 export default {
   components: {
-    ChineseTextToSpeech,
-    CopiedIcon,
     FloatingControls,
     FontControls,
-    CopyIcon,
   },
   name: 'FontConverter',
   setup() {
@@ -123,175 +116,6 @@ export default {
     const COPIED_ICON_DURATION = 3000;
     const showPinyin = ref(true);
 
-    // URL Fetcher related refs
-    const fetchUrl = ref('https://www.zhihu.com/question/272484374/answer/3630232523');
-    const htmlContent = ref('');
-    const loading = ref(false);
-    const fetchError = ref('');
-    const fetchSuccess = ref(false);
-
-    // Add these after your existing refs (around line 20)
-    const customUrlScheme = ref('myapp');
-    const interceptedUrl = ref('');
-    const showInAppBrowser = ref(false);
-    const inAppBrowserUrl = ref('');
-
-    
-    // Add this inside setup(), after your watch statements
-    onMounted(() => {
-      initCustomUrlListener();
-    });
-    // CORS proxy options
-    const corsProxies = [
-      'https://api.allorigins.win/raw?url=',
-      'https://corsproxy.io/?',
-      'https://cors-anywhere.herokuapp.com/',
-      'https://thingproxy.freeboard.io/fetch/'
-    ];
-
-
-    // Add after clearHtmlContent method (around line 130)
-      const handleCustomUrl = (url) => {
-        try {
-          const customUrl = new URL(url);
-          if (customUrl.protocol === `${customUrlScheme.value}:`) {
-            // Extract the actual URL from custom scheme
-            // Format: myapp://domain.com/path -> https://domain.com/path
-            const actualUrl = 'https://' + customUrl.host + customUrl.pathname + customUrl.search;
-            openInAppBrowser(actualUrl);
-            return true;
-          }
-        } catch (error) {
-          console.error('Invalid custom URL:', error);
-        }
-        return false;
-      };
-
-    const openInAppBrowser = (url) => {
-      inAppBrowserUrl.value = url;
-      showInAppBrowser.value = true;
-    };
-
-    const closeInAppBrowser = () => {
-      showInAppBrowser.value = false;
-      inAppBrowserUrl.value = '';
-    };
-
-    const convertToCustomUrl = (regularUrl) => {
-      try {
-        const url = new URL(regularUrl);
-        return `${customUrlScheme.value}://${url.host}${url.pathname}${url.search}`;
-      } catch (error) {
-        console.error('Invalid URL:', error);
-        return '';
-      }
-    };
-
-    // Listen for custom URL schemes when component mounts
-    const initCustomUrlListener = () => {
-      // Check if URL contains custom scheme on page load
-      const currentUrl = window.location.href;
-      if (currentUrl.includes(`${customUrlScheme.value}:`)) {
-        const customUrl = currentUrl.split('#')[1] || currentUrl.split('?url=')[1];
-        if (customUrl) {
-          handleCustomUrl(decodeURIComponent(customUrl));
-        }
-      }
-      
-      // Listen for URL changes
-      window.addEventListener('hashchange', () => {
-        const hash = window.location.hash.substring(1);
-        if (hash.startsWith(`${customUrlScheme.value}:`)) {
-          handleCustomUrl(hash);
-        }
-      });
-    };
-
-    const fetchWithProxy = async (targetUrl, proxyIndex = 0) => {
-      if (proxyIndex >= corsProxies.length) {
-        throw new Error('All CORS proxies failed');
-      }
-
-      try {
-        const proxyUrl = corsProxies[proxyIndex] + encodeURIComponent(targetUrl);
-        const response = await fetch(proxyUrl);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        return await response.text();
-      } catch (err) {
-        console.warn(`Proxy ${proxyIndex + 1} failed:`, err.message);
-        // Try next proxy
-        return fetchWithProxy(targetUrl, proxyIndex + 1);
-      }
-    };
-
-    // const fetchUrlContent = async () => {
-    //   if (!fetchUrl.value.trim()) {
-    //     fetchError.value = 'Please enter a URL';
-    //     return;
-    //   }
-
-    //   loading.value = true;
-    //   fetchError.value = '';
-    //   fetchSuccess.value = false;
-    //   htmlContent.value = '';
-
-    //   try {
-    //     // First try direct fetch (will work for same-origin or CORS-enabled sites)
-    //     let content;
-    //     try {
-    //       const directResponse = await fetch(fetchUrl.value);
-    //       if (directResponse.ok) {
-    //         content = await directResponse.text();
-    //       } else {
-    //         throw new Error('Direct fetch failed, trying proxy...');
-    //       }
-    //     } catch (directError) {
-    //       console.log('Direct fetch failed, using CORS proxy...');
-    //       content = await fetchWithProxy(fetchUrl.value);
-    //     }
-
-    //     htmlContent.value = content;
-    //     fetchSuccess.value = true;
-    //     fetchError.value = '';
-    //   } catch (err) {
-    //     fetchError.value = `Failed to fetch URL: ${err.message}`;
-    //     htmlContent.value = '';
-    //   } finally {
-    //     loading.value = false;
-    //   }
-    // };
-
-    const copyHtmlContent = async () => {
-      try {
-        await navigator.clipboard.writeText(htmlContent.value);
-        // You could add a toast notification here
-        console.log('HTML content copied to clipboard');
-      } catch (err) {
-        console.error('Failed to copy to clipboard:', err);
-      }
-    };
-
-    const downloadHtml = () => {
-      const blob = new Blob([htmlContent.value], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'fetched-content.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    };
-
-    const clearHtmlContent = () => {
-      htmlContent.value = '';
-      fetchSuccess.value = false;
-      fetchError.value = '';
-    };
 
     const togglePinyin = () => {
       showPinyin.value = !showPinyin.value;
@@ -313,13 +137,41 @@ export default {
     const getFontFamily = computed(() => fonts[selectedFont.value]);
 
     // Function to break English text into paragraphs that match Chinese paragraphs
+    // const breakEnglishText = (englishText, chineseSegments) => {
+    //   if (!englishText.trim()) return {};
+      
+    //   // Split English text by paragraphs (double line breaks or single line breaks)
+    //   const englishParagraphs = englishText
+    //     .split(/\n\s*\n|\r\n\s*\r\n/) // Split by double line breaks first
+    //     .flatMap(para => para.split(/\n|\r\n/)) // Then split by single line breaks
+    //     .map(para => para.trim())
+    //     .filter(para => para);
+      
+    //   // Create mapping between Chinese and English paragraphs
+    //   const result = {};
+    //   const chineseSegmentKeys = Object.keys(chineseSegments);
+      
+    //   englishParagraphs.forEach((paragraph, index) => {
+    //     if (index < chineseSegmentKeys.length) {
+    //       result[chineseSegmentKeys[index]] = paragraph;
+    //     }
+    //   });
+      
+    //   return result;
+    // };
+
+
     const breakEnglishText = (englishText, chineseSegments) => {
       if (!englishText.trim()) return {};
       
-      // Split English text by paragraphs (double line breaks or single line breaks)
-      const englishParagraphs = englishText
-        .split(/\n\s*\n|\r\n\s*\r\n/) // Split by double line breaks first
-        .flatMap(para => para.split(/\n|\r\n/)) // Then split by single line breaks
+      // First, normalize all line breaks and replace multiple empty lines with single empty lines
+      const normalizedText = englishText
+        .replace(/\r\n/g, '\n') // Normalize to Unix line breaks
+        .replace(/\n\s*\n(\s*\n)*/g, '\n\n'); // Replace multiple empty lines with single empty lines
+      
+      // Then split by double line breaks to get paragraphs
+      const englishParagraphs = normalizedText
+        .split(/\n\n/)
         .map(para => para.trim())
         .filter(para => para);
       
@@ -398,7 +250,6 @@ export default {
       const text = type === 'chinese' ? inputText.value : englishText.value;
       
       if (text.trim()) {
-        // If there's text, clear it
         clearText(type);
       } else {
         // If empty, paste from clipboard
@@ -440,13 +291,47 @@ export default {
       return flattenedPairs;
     };
 
+    // const comparisonData = computed(() => {
+    //   if (!inputText.value) return {};
+      
+    //   // Split Chinese text by paragraphs (line breaks)
+    //   const chineseParagraphs = inputText.value
+    //     .split(/\n\s*\n|\r\n\s*\r\n/) // Split by double line breaks first
+    //     .flatMap(para => para.split(/\n|\r\n/)) // Then split by single line breaks
+    //     .map(para => para.trim())
+    //     .filter(para => para);
+      
+    //   const result = {};
+      
+    //   chineseParagraphs.forEach((paragraph, index) => {
+    //     const sentenceId = index;
+    //     result[sentenceId] = {
+    //       lines: {},
+    //       sentencePinyin: getPinyinForSentence(paragraph)
+    //     };
+        
+    //     // For paragraphs, we treat the entire paragraph as one "line"
+    //     result[sentenceId].lines[0] = {
+    //       text: paragraph,
+    //       pinyin: getPinyinForSentence(paragraph),
+    //       textAndPinyin: getPinyinAndChar(paragraph)
+    //     };
+    //   });
+      
+    //   return result;
+    // });
+
     const comparisonData = computed(() => {
       if (!inputText.value) return {};
       
-      // Split Chinese text by paragraphs (line breaks)
-      const chineseParagraphs = inputText.value
-        .split(/\n\s*\n|\r\n\s*\r\n/) // Split by double line breaks first
-        .flatMap(para => para.split(/\n|\r\n/)) // Then split by single line breaks
+      // First, normalize all line breaks and replace multiple empty lines with single empty lines
+      const normalizedText = inputText.value
+        .replace(/\r\n/g, '\n') // Normalize to Unix line breaks
+        .replace(/\n\s*\n(\s*\n)*/g, '\n\n'); // Replace multiple empty lines with single empty lines
+      
+      // Then split by double line breaks to get paragraphs
+      const chineseParagraphs = normalizedText
+        .split(/\n\n/)
         .map(para => para.trim())
         .filter(para => para);
       
@@ -459,7 +344,6 @@ export default {
           sentencePinyin: getPinyinForSentence(paragraph)
         };
         
-        // For paragraphs, we treat the entire paragraph as one "line"
         result[sentenceId].lines[0] = {
           text: paragraph,
           pinyin: getPinyinForSentence(paragraph),
@@ -498,7 +382,7 @@ export default {
         const isChinese = char => /[\u4e00-\u9fa5]/.test(char);
         const isEnglish = char => /[a-zA-Z0-9]/.test(char);
         const isSpace = char => /\s/.test(char);
-        const isSymbol = char => /[。，？%#@*&^$!-><()_.""''=\[\]:《》【】（）！。，、：;'"『』「」]/.test(char);
+        const isSymbol = char => /[。，？%#@*&^$!-><()_.""''=[\]:《》【】（）！。，、：;'"『』「」]/.test(char);
 
         for (const char of sentence) {
             if (isChinese(char)) {
@@ -648,7 +532,7 @@ export default {
     
     const getAllText = () => {
       let allText = '';
-      if (comparisonData) {
+      if (comparisonData.value) {
         for (const sentenceId in comparisonData) {
           const lines = comparisonData[sentenceId];
           for (const line of lines) {
@@ -658,7 +542,7 @@ export default {
       }
       return allText;
     };
-    
+
     const getBlockText = (lines) => {
       return Object.values(lines).map(line => line.text).join('，');
     };
@@ -694,27 +578,6 @@ export default {
       togglePinyin,
       setActiveTextarea,
       activeTextarea,
-      // URL Fetcher methods
-      fetchUrl,
-      htmlContent,
-      loading,
-      fetchError,
-      fetchSuccess,
-      // fetchUrlContent,
-      copyHtmlContent,
-      downloadHtml,
-      clearHtmlContent,
-
-
-        customUrlScheme,
-        interceptedUrl,
-        showInAppBrowser,
-        inAppBrowserUrl,
-        handleCustomUrl,
-        openInAppBrowser,
-        closeInAppBrowser,
-        convertToCustomUrl,
-        initCustomUrlListener,
     };
   },
 };
@@ -924,172 +787,3 @@ textarea:-moz-placeholder { /* Firefox older versions */
   }
 }
 </style>
-
-
-
-<!-- 
-<script>
-const breakingEnglishtext = (englishText, chineseSegments) => {
-  if (!englishText.trim()) return ();
-
-  // Splite English text by paragrapghs (double line breaks or single line breaks)
-  const englishPasagraphs = englishText
-    .split(/\n\s*\n|\r\n\s*\r\n/) // Split by double lines breaks first
-    .flatMap(para => para.split(/\n|\r\n/)) // Then split by single line breaks
-    .map(para => para.trrim())
-    .filter(para => para);
-
-  // Create mapping between Chinese and English paragraphs
-  const result = {};
-  const chineseSegmentKeys = Object.keys(chineseSegments);
-
-  engilishParagraphs.forEach((paragraph, index) => {
-    if (index < chineseSegmentKeys.length) {
-      result[chineseSegmentKeys[index]] = paragraph;
-    }
-  });
-
-  return result;
-};
-
-const englishSegments = computed(() => {
-  return breakEnglishText(englishText.value, comparisonData.value);
-});
-
-const textBlocks = computed(() => {
-  if (!inputText.value) return [];
-
-  const sentences =
-    inputText.value.match(/[^。!?!?]+[。!?!?]+/g) || [];
-  const remaningText = inputText.value.match(/[^。 !?!?]+$/);
-
-  if (remaningText){
-    sentences.push(remaningText[0]);
-  };
-  return sentences.filter(sentence => sentence);
-});
-
-const pastFromClipboard = async (target = null) => {
-  try {
-    const clipboardText = await navigator.clipboard.readText();
-    const targetType = target || activeTextarea.value;
-
-    if (targetTyle === 'chinese') {
-      inputText.value = clipboardText;
-    } else {
-      englishText.value = clipboardText;
-    }
-  } catch (error) {
-    console.error('Failed to read clipboard contents': error);
-  }
-};
-
-conat clearText = (type = 'both') => {
-  if (type === 'chinese' || type === 'both') {
-    inputText.value = '';
-    if (chineseTextarea.value){
-      setTimeout(() => {
-        chineseTextarea.value.style.height = 'auto';
-        chineseTextarea.value.style.height = '40px';
-      },0);
-    }
-  }
-
-  if (type === 'english' || type === 'both') {
-    englishText.value = '';
-    if (englishTextarea.value) {
-      setTimeout(()=> {
-        englishTextarea.value.style.height = 'auto';
-        englishTextarea.value.style.height = '40px';
-      },0);
-    }
-  }
-};
-
-
-const clearAllText = () => {
-  clearText('both');
-};
-
-const clearOrPasteText = (type) => {
-  const text = type === 'chinese' ? inputtext.value : englishText.value;
-
-  if (text.trim()) {
-    // if there's text, clear it
-    clear(type);
-  } else {
-    // if emmpty, paste from clipboard
-    pasteFromClipboard(type);
-  }
-};
-
-const splitIntolines = text => {
-  const newlineParts = text.split(/\r?\n/);
-
-  return newlineParts.flatMap(part => {
-    const commaParts = part.split(',');
-    return commaParts
-      .map((line, index) => {
-        if (index < commaParts.length -1 || parts.endsWith(',')) {
-          return line.trim() + ',';
-        } else {
-          return line.trim();
-        }
-      })
-       .filter(line => line);
-  });
-};
-
-const flattenBlockLines = (blockObject) => {
-  const flattenedPairs = [];
-
-  if (!blockObject || !blockObject.lines){
-    return flattenedPairs;
-  }
-
-  Object.values(blockObject.lines).forEach(line => {
-    if (line.textAndPinyin && Array.isArray(line.textAndPinyin)) {
-      line.textAndPinyin.forEach(pair => {
-        flattenedPairs.push(pair);
-      });
-    }
-  });
-  return flattenedPairs;
-};
-
-const comparisonData = computed(() => {
-  if (!inputText.value) return {};
-
-  // Split chinese text by paragraphs (line breaks)
-  const chineseParagraphs = inputText.value
-    .split(/\n\s*\n|\r\n\s*\r\n) // Split by double line breaks first
-    .flatMap(para => para.split(/\n|\r\n/)) // Then split by single line breaks
-    .map(para => para.trim())
-    .filter(para => para);
-
-  const result = {};
-
-  chineseParagraphs.forEach((paragrapgh, index) => {
-    const sentenceId = index;
-    result[sentanceId] = {
-      lines: {},
-      sentancePinyin: getPinyinForSentences(paragraph)
-    };
-
-    // For paragraphs, we treat the entire paragraph as one "line"
-    result[sentenceId].lines[0] = {
-      text: paragraph,
-      pinyin: getpinyinForSentence(paragraph),
-      textAndPinyin: getPinyinAndChar(paragraph)
-    };
-  });
-  retun result;
-});
-
-const isPunctuation = char => {
-  const punctuationRegex = /[《》【】（）！？。，、：；'"『』「」]/;
-  
-}
-
-</script> -->
-
